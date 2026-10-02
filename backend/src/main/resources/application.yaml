@@ -1,4 +1,11 @@
 spring:
+  data:
+    web:
+      pageable:
+        serialization-mode: via-dto
+        one-indexed-parameters: true
+        max-page-size: 50
+
   error:
     include-stacktrace: never
     include-message: never
