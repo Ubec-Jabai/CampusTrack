@@ -2,6 +2,7 @@ package com.jabai.campustrack.Models;
 
 import com.jabai.campustrack.Models.Enums.NfcTagStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Generated;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ public class NfcTag {
   private long id;
 
   @Column(name = "created_at", updatable = false, insertable = false)
+  @Generated
   private LocalDateTime createdAt;
 
   // Core columns
