@@ -4,6 +4,7 @@ import com.jabai.campustrack.Models.Enums.IncidentCategory;
 import com.jabai.campustrack.Models.Enums.IncidentPriority;
 import com.jabai.campustrack.Models.Enums.IncidentStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Generated;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,9 +16,10 @@ public class Incident {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
-  private Long id;
+  private long id;
 
   @Column(name = "created_at", insertable = false, updatable = false)
+  @Generated // Return the database-generated timestamp after an insert.
   private LocalDateTime createdAt;
 
   // Core columns
@@ -144,7 +146,7 @@ public class Incident {
   }
 
   // Getters
-  public Long getId() { return id; }
+  public long getId() { return id; }
   public LocalDateTime getCreatedAt() { return createdAt; }
   public LocalDateTime getEvaluatedAt() { return evaluatedAt; }
   public LocalDateTime getResolvedAt() { return resolvedAt; }
