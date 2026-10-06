@@ -1,6 +1,8 @@
 package com.jabai.campustrack.Models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Generated;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,7 @@ public class Building {
   @Column(name = "id")
   private long id;
 
+@Generated
   @Column(name = "created_at", updatable = false, insertable = false)
   private LocalDateTime createdAt;
 

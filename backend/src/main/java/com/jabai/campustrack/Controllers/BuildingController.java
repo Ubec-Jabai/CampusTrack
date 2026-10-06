@@ -5,11 +5,12 @@ import com.jabai.campustrack.DTOs.Requests.UpdateBuildingRequestDto;
 import com.jabai.campustrack.DTOs.Responses.BuildingResponseDto;
 import com.jabai.campustrack.Services.BuildingService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * <h4>NOTE: DO NOT VIOLATE LAYERS STRUCTURE.</h4>
@@ -34,8 +35,12 @@ public class BuildingController {
 
     // Read all
     @GetMapping
-    public ResponseEntity<List<BuildingResponseDto>> getAllBuildings() {
-        List<BuildingResponseDto> buildings = buildingService.getAllBuildings();
+    public ResponseEntity<Page<BuildingResponseDto>> getAllBuildings(
+            Pageable pageable
+    ) {
+        Page<BuildingResponseDto> buildings =
+                buildingService.getAllBuildings(pageable);
+
         return ResponseEntity.ok(buildings);
     }
 
