@@ -45,6 +45,6 @@ export default profileApi;
 
 // Usage:
 // const profile = await profileApi.getProfile();
-// const updated = await profileApi.updateProfile({ name: "Jane Doe", email: "jane@example.com" });
+// const updated = await profileApi.updateProfile({ firstName: "Jane", lastName: "Doe", email: "jane@example.com" });
 // await profileApi.changePassword({ currentPassword: "oldPass", password: "newPassword123", passwordConfirmation: "newPassword123" });
 // await profileApi.deleteAccount();

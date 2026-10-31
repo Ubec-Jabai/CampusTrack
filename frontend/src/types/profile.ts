@@ -1,8 +1,26 @@
 import { UserRole } from "./auth";
 
+export interface ProfileDto {
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  suffix: string | null;
+  phone: string | null;
+  studentNumber: string | null;
+  department: string | null;
+  avatarPath: string | null;
+  createdAt: string;
+}
+
 export interface UpdateUserProfileRequestDto {
-  name?: string;
   email?: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  suffix?: string;
+  phone?: string;
+  studentNumber?: string;
+  department?: string;
 }
 
 export interface UpdateUserPasswordRequestDto {
@@ -12,9 +30,9 @@ export interface UpdateUserPasswordRequestDto {
 }
 
 export interface UserProfileResponseDto {
-  createdAt: string;
   id: number;
-  name: string;
   email: string;
   userRole: UserRole;
+  createdAt: string;
+  profile: ProfileDto | null;
 }

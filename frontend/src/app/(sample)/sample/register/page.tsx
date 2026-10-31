@@ -19,7 +19,8 @@ import { useAuth } from "@/components/hooks/use-auth";
 export default function SampleRegisterPage() {
   const router = useRouter();
   const { isLoading, isLoggedIn } = useAuth();
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -45,7 +46,13 @@ export default function SampleRegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await register({ name, email, password, passwordConfirmation });
+      const response = await register({
+        firstName,
+        lastName,
+        email,
+        password,
+        passwordConfirmation,
+      });
       setSuccessMessage(response.message || "Registration successful. Please log in.");
     } catch (cause: unknown) {
       setError(cause instanceof Error ? cause.message : "Registration failed. Please try again.");
@@ -71,14 +78,26 @@ export default function SampleRegisterPage() {
             <form onSubmit={handleSubmit}>
               <FieldGroup className="gap-5">
                 <Field>
-                  <FieldLabel htmlFor="name">Name</FieldLabel>
+                  <FieldLabel htmlFor="firstName">First name</FieldLabel>
                   <Input
-                    id="name"
-                    name="name"
+                    id="firstName"
+                    name="firstName"
                     type="text"
-                    autoComplete="name"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    autoComplete="given-name"
+                    value={firstName}
+                    onChange={(event) => setFirstName(event.target.value)}
+                    required
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="lastName">Last name</FieldLabel>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    autoComplete="family-name"
+                    value={lastName}
+                    onChange={(event) => setLastName(event.target.value)}
                     required
                   />
                 </Field>

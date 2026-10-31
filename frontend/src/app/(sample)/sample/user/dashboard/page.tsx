@@ -37,7 +37,8 @@ export default function UserDashboardPage() {
   const [profile, setProfile] = useState<UserProfileResponseDto | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
@@ -59,7 +60,8 @@ export default function UserDashboardPage() {
     try {
       const data = await getProfile();
       setProfile(data);
-      setName(data.name);
+      setFirstName(data.profile?.firstName ?? "");
+      setLastName(data.profile?.lastName ?? "");
       setEmail(data.email);
     } catch (cause: unknown) {
       setError(
@@ -95,9 +97,10 @@ export default function UserDashboardPage() {
     setIsSavingProfile(true);
 
     try {
-      const updatedProfile = await updateProfile({ name, email });
+      const updatedProfile = await updateProfile({ firstName, lastName, email });
       setProfile(updatedProfile);
-      setName(updatedProfile.name);
+      setFirstName(updatedProfile.profile?.firstName ?? "");
+      setLastName(updatedProfile.profile?.lastName ?? "");
       setEmail(updatedProfile.email);
       setProfileMessage("Profile updated successfully.");
     } catch (cause: unknown) {
@@ -178,7 +181,13 @@ export default function UserDashboardPage() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Name</p>
-                  <p className="font-semibold">{profile.name}</p>
+                  <p className="font-semibold">
+                    {profile.profile
+                      ? [profile.profile.firstName, profile.profile.middleName, profile.profile.lastName, profile.profile.suffix]
+                          .filter(Boolean)
+                          .join(" ")
+                      : "—"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Email</p>
@@ -218,8 +227,12 @@ export default function UserDashboardPage() {
                 <form onSubmit={handleUpdateProfile} noValidate>
                   <FieldGroup className="gap-5">
                     <Field>
-                      <FieldLabel htmlFor="profile-name">Name</FieldLabel>
-                      <Input id="profile-name" name="name" value={name} maxLength={100} onChange={(event) => setName(event.target.value)} />
+                      <FieldLabel htmlFor="profile-first-name">First name</FieldLabel>
+                      <Input id="profile-first-name" name="firstName" value={firstName} maxLength={100} onChange={(event) => setFirstName(event.target.value)} />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="profile-last-name">Last name</FieldLabel>
+                      <Input id="profile-last-name" name="lastName" value={lastName} maxLength={100} onChange={(event) => setLastName(event.target.value)} />
                     </Field>
                     <Field>
                       <FieldLabel htmlFor="profile-email">Email</FieldLabel>

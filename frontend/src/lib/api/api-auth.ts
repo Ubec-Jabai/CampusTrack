@@ -22,12 +22,7 @@ export interface LoginOptions {
 export async function register(
   data: RegisterUserRequestDto
 ): Promise<RegisterUserResponseDto> {
-  const payload: RegisterUserRequestDto = {
-    ...data,
-    role: data.role ?? UserRole.STUDENT,
-  };
-
-  return apiClient.post<RegisterUserResponseDto>("/api/auth/register", payload);
+  return apiClient.post<RegisterUserResponseDto>("/api/auth/register", data);
 }
 
 export async function login(
@@ -66,5 +61,5 @@ export default authApi;
 
 // Usage:
 // const res = await authApi.login({ email: "user@example.com", password: "secret" });
-// await authApi.register({ name: "Jane", email: "jane@example.com", password: "secretPassword", passwordConfirmation: "secretPassword" });
+// await authApi.register({ firstName: "Jane", lastName: "Doe", email: "jane@example.com", password: "secretPassword", passwordConfirmation: "secretPassword" });
 // await authApi.logout();

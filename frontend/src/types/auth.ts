@@ -11,20 +11,23 @@ export interface LoginUserRequestDto {
 
 export interface LoginUserResponseDto {
   message?: string | null;
-  name?: string | null;
   email?: string | null;
   token?: string | null;
 }
 
 export interface RegisterUserRequestDto {
-  name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  suffix?: string;
+  phone?: string;
+  studentNumber?: string;
+  department?: string;
   email: string;
   password: string;
   passwordConfirmation: string;
-  role?: UserRole;
 }
 
 export interface RegisterUserResponseDto {
   message?: string | null;
 }
-
