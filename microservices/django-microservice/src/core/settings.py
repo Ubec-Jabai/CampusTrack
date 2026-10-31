@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -64,6 +65,15 @@ MIDDLEWARE = [
 JWT_SECRET = os.getenv("JWT_SECRET", "")
 JWT_ISSUER = os.getenv("JWT_ISSUER", "")
 JWT_ALGORITHMS = ["HS256"]
+
+# Rate limiting
+try:
+    RATE_LIMIT_REQUESTS: int = int(os.getenv("RATE_LIMIT_REQUESTS", "30"))
+    RATE_LIMIT_WINDOW_SECONDS: int = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
+except ValueError as ex:
+    raise ImproperlyConfigured("RATE_LIMIT_REQUESTS and RATE_LIMIT_WINDOW_SECONDS must be integers.") from ex
+if RATE_LIMIT_REQUESTS <= 0 or RATE_LIMIT_WINDOW_SECONDS <= 0:
+    raise ImproperlyConfigured("RATE_LIMIT_REQUESTS and RATE_LIMIT_WINDOW_SECONDS must be greater than zero.")
 
 # ALLOWED ORIGINS
 CORS_ALLOWED_ORIGINS = [
