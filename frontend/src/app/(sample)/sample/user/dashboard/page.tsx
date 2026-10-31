@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/hooks/use-auth";
 import {
@@ -38,8 +39,13 @@ export default function UserDashboardPage() {
   const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [suffix, setSuffix] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [studentNumber, setStudentNumber] = useState("");
+  const [department, setDepartment] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -61,8 +67,13 @@ export default function UserDashboardPage() {
       const data = await getProfile();
       setProfile(data);
       setFirstName(data.profile?.firstName ?? "");
+      setMiddleName(data.profile?.middleName ?? "");
       setLastName(data.profile?.lastName ?? "");
+      setSuffix(data.profile?.suffix ?? "");
       setEmail(data.email);
+      setPhone(data.profile?.phone ?? "");
+      setStudentNumber(data.profile?.studentNumber ?? "");
+      setDepartment(data.profile?.department ?? "");
     } catch (cause: unknown) {
       setError(
         cause instanceof Error ? cause.message : "Failed to load user profile."
@@ -97,11 +108,25 @@ export default function UserDashboardPage() {
     setIsSavingProfile(true);
 
     try {
-      const updatedProfile = await updateProfile({ firstName, lastName, email });
+      const updatedProfile = await updateProfile({
+        firstName,
+        middleName,
+        lastName,
+        suffix,
+        email,
+        phone,
+        studentNumber,
+        department,
+      });
       setProfile(updatedProfile);
       setFirstName(updatedProfile.profile?.firstName ?? "");
+      setMiddleName(updatedProfile.profile?.middleName ?? "");
       setLastName(updatedProfile.profile?.lastName ?? "");
+      setSuffix(updatedProfile.profile?.suffix ?? "");
       setEmail(updatedProfile.email);
+      setPhone(updatedProfile.profile?.phone ?? "");
+      setStudentNumber(updatedProfile.profile?.studentNumber ?? "");
+      setDepartment(updatedProfile.profile?.department ?? "");
       setProfileMessage("Profile updated successfully.");
     } catch (cause: unknown) {
       setProfileError(cause instanceof Error ? cause.message : "Failed to update profile.");
@@ -170,39 +195,87 @@ export default function UserDashboardPage() {
             )}
 
             {!isLoading && !error && profile && (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <p className="text-muted-foreground">User ID</p>
-                  <p className="font-semibold">{profile.id}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Role</p>
-                  <p className="font-semibold">{profile.userRole}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Name</p>
-                  <p className="font-semibold">
-                    {profile.profile
-                      ? [profile.profile.firstName, profile.profile.middleName, profile.profile.lastName, profile.profile.suffix]
+              <div className="space-y-6">
+                {profile.profile?.avatarPath && (
+                  <div>
+                    <p className="text-muted-foreground">Avatar</p>
+                    <div className="flex justify-center">
+                      <Image
+                        src={profile.profile.avatarPath}
+                        alt="Profile avatar"
+                        width={128}
+                        height={128}
+                        className="size-32 rounded-full object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div>
+                    <p className="text-muted-foreground">User ID</p>
+                    <p className="font-semibold">{profile.id}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Role</p>
+                    <p className="font-semibold">{profile.userRole}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Name</p>
+                    <p className="font-semibold">
+                      {profile.profile
+                        ? [profile.profile.firstName, profile.profile.middleName, profile.profile.lastName, profile.profile.suffix]
                           .filter(Boolean)
                           .join(" ")
-                      : "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Email</p>
-                  <p className="font-semibold">{profile.email}</p>
-                </div>
-                <div className="sm:col-span-2">
-                  <p className="text-muted-foreground">Created At</p>
-                  <p className="font-semibold">
-                    {Number.isNaN(new Date(profile.createdAt).getTime())
-                      ? profile.createdAt
-                      : new Date(profile.createdAt).toLocaleString(undefined, {
+                        : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Email</p>
+                    <p className="font-semibold">{profile.email}</p>
+                  </div>
+                  {profile.profile?.phone && (
+                    <div>
+                      <p className="text-muted-foreground">Phone</p>
+                      <p className="font-semibold">{profile.profile?.phone}</p>
+                    </div>
+                  )}
+                  {profile.userRole === "STUDENT" && profile.profile?.studentNumber && (
+                    <div>
+                      <p className="text-muted-foreground">Student number</p>
+                      <p className="font-semibold">{profile.profile?.studentNumber}</p>
+                    </div>
+                  )}
+                  {profile.profile?.department && (
+                    <div>
+                      <p className="text-muted-foreground">Department</p>
+                      <p className="font-semibold">{profile.profile?.department}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-muted-foreground">Profile created</p>
+                    <p className="font-semibold">
+                      {profile.profile?.createdAt
+                        ? Number.isNaN(new Date(profile.profile.createdAt).getTime())
+                          ? profile.profile.createdAt
+                          : new Date(profile.profile.createdAt).toLocaleString(undefined, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })
+                        : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Created At</p>
+                    <p className="font-semibold">
+                      {Number.isNaN(new Date(profile.createdAt).getTime())
+                        ? profile.createdAt
+                        : new Date(profile.createdAt).toLocaleString(undefined, {
                           dateStyle: "medium",
                           timeStyle: "short",
                         })}
-                  </p>
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
@@ -221,7 +294,7 @@ export default function UserDashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Edit profile</CardTitle>
-                <CardDescription>Update your name and email address.</CardDescription>
+                <CardDescription>Update your profile details.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdateProfile} noValidate>
@@ -231,12 +304,34 @@ export default function UserDashboardPage() {
                       <Input id="profile-first-name" name="firstName" value={firstName} maxLength={100} onChange={(event) => setFirstName(event.target.value)} />
                     </Field>
                     <Field>
+                      <FieldLabel htmlFor="profile-middle-name">Middle name</FieldLabel>
+                      <Input id="profile-middle-name" name="middleName" value={middleName} maxLength={100} onChange={(event) => setMiddleName(event.target.value)} />
+                    </Field>
+                    <Field>
                       <FieldLabel htmlFor="profile-last-name">Last name</FieldLabel>
                       <Input id="profile-last-name" name="lastName" value={lastName} maxLength={100} onChange={(event) => setLastName(event.target.value)} />
                     </Field>
                     <Field>
+                      <FieldLabel htmlFor="profile-suffix">Suffix</FieldLabel>
+                      <Input id="profile-suffix" name="suffix" value={suffix} maxLength={20} onChange={(event) => setSuffix(event.target.value)} />
+                    </Field>
+                    <Field>
                       <FieldLabel htmlFor="profile-email">Email</FieldLabel>
                       <Input id="profile-email" name="email" type="email" value={email} maxLength={100} onChange={(event) => setEmail(event.target.value)} />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="profile-phone">Phone</FieldLabel>
+                      <Input id="profile-phone" name="phone" type="tel" value={phone} maxLength={20} onChange={(event) => setPhone(event.target.value)} />
+                    </Field>
+                    {profile.userRole === "STUDENT" && (
+                      <Field>
+                        <FieldLabel htmlFor="profile-student-number">Student number</FieldLabel>
+                        <Input id="profile-student-number" name="studentNumber" value={studentNumber} maxLength={50} onChange={(event) => setStudentNumber(event.target.value)} />
+                      </Field>
+                    )}
+                    <Field>
+                      <FieldLabel htmlFor="profile-department">Department</FieldLabel>
+                      <Input id="profile-department" name="department" value={department} maxLength={100} onChange={(event) => setDepartment(event.target.value)} />
                     </Field>
                     {profileError && <FieldError>{profileError}</FieldError>}
                     {profileMessage && <p role="status">{profileMessage}</p>}
