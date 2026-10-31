@@ -154,13 +154,7 @@ public class MaintenanceRecordService {
         Incident incident = maintenanceRecord.getIncident();
         User user = maintenanceRecord.getUser();
 
-        UserProfileResponseDto userProfileResponseDto = new UserProfileResponseDto(
-                user.getCreatedAt(),
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getUserRole()
-        );
+        UserProfileResponseDto userProfileResponseDto = UserProfileResponseDto.from(user);
 
         IncidentResponseDto incidentResponseDto = new IncidentResponseDto(
                 incident.getId(),

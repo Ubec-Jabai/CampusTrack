@@ -5,6 +5,7 @@ import com.jabai.campustrack.DTOs.Requests.RegisterUserRequestDto;
 import com.jabai.campustrack.DTOs.Responses.LoginUserResponseDto;
 import com.jabai.campustrack.DTOs.Responses.RegisterUserResponseDto;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,14 +28,12 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterUserResponseDto> registerUser(@Valid @RequestBody RegisterUserRequestDto registerUserRequestDto) {
-        RegisterUserResponseDto responseDto = userService.registerUser(registerUserRequestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(registerUserRequestDto));
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginUserResponseDto> loginUser(@Valid @RequestBody LoginUserRequestDto loginUserRequestDto) {
-        LoginUserResponseDto responseDto = userService.loginUser(loginUserRequestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(userService.loginUser(loginUserRequestDto));
     }
 
     /**

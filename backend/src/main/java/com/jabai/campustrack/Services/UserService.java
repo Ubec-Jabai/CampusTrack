@@ -12,6 +12,7 @@ import com.jabai.campustrack.Exceptions.CustomExceptions.DuplicatedRowException;
 import com.jabai.campustrack.Exceptions.CustomExceptions.RowNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jabai.campustrack.Repositories.UserRepository;
 import com.jabai.campustrack.Exceptions.CustomExceptions.InvalidCredentialsException;
@@ -21,11 +22,11 @@ import com.jabai.campustrack.Models.Enums.UserRole;
 
 import java.util.Optional;
 
-@Service 
+@Service
 public class UserService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
-    private final UserRepository userRepository; 
+    private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
@@ -38,25 +39,28 @@ public class UserService {
      * Para sa auth controller
      */
 
-    // Register user
-    public RegisterUserResponseDto registerUser(RegisterUserRequestDto registerUserRequestDto) {
-        if (userRepository.findByEmail(registerUserRequestDto.getEmail()).isPresent())
+    @Transactional
+    public RegisterUserResponseDto registerUser(RegisterUserRequestDto dto) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent())
             throw new DuplicatedRowException("This email already exists.");
 
-        String hashedPassword = passwordEncoder.encode(registerUserRequestDto.getPassword());
+        User user = new User(dto.getEmail(), passwordEncoder.encode(dto.getPassword()), UserRole.STUDENT);
 
-        User user = new User(
-            registerUserRequestDto.getName(),
-            registerUserRequestDto.getEmail(),
-            hashedPassword,
-            UserRole.STUDENT
-        );
+        UserProfile profile = new UserProfile(user);
+        profile.setFirstName(dto.getFirstName());
+        profile.setMiddleName(dto.getMiddleName());
+        profile.setLastName(dto.getLastName());
+        profile.setSuffix(dto.getSuffix());
+        profile.setPhone(dto.getPhone());
+        profile.setStudentNumber(dto.getStudentNumber());
+        profile.setDepartment(dto.getDepartment());
 
+        user.setProfile(profile);
         userRepository.save(user);
+
         return new RegisterUserResponseDto("Your account has successfully been created.");
     }
 
-    // Login user
     public LoginUserResponseDto loginUser(LoginUserRequestDto loginUserRequestDto) throws RuntimeException {
         Optional<User> foundUser = userRepository.findByEmail(loginUserRequestDto.getEmail());
 
@@ -70,7 +74,6 @@ public class UserService {
 
         return new LoginUserResponseDto(
                 "Login success!",
-                currentUser.getName(),
                 currentUser.getEmail(),
                 userToken
         );
@@ -81,26 +84,21 @@ public class UserService {
      * Para sa profile controller
      */
 
-    // Get
     public UserProfileResponseDto getUserProfile(Long id) {
-        User user =  userRepository
+        User user = userRepository
                 .findById(id)
-                .orElseThrow(() -> new RowNotFoundException("Email not found."));
+                .orElseThrow(() -> new RowNotFoundException("User not found."));
 
-        return buildUserProfileResponseDto(user);
+        return UserProfileResponseDto.from(user);
     }
 
-    // Update
-    public UserProfileResponseDto updateUserProfile(Long id, UpdateUserProfileRequestDto updateUserProfileRequestDto) {
+    @Transactional
+    public UserProfileResponseDto updateUserProfile(Long id, UpdateUserProfileRequestDto dto) {
         User foundUser = userRepository
                 .findById(id)
                 .orElseThrow(() -> new RowNotFoundException("Unable to find the user."));
 
-        String name = updateUserProfileRequestDto.getName();
-        String email =  updateUserProfileRequestDto.getEmail();
-
-        if (name != null)
-            foundUser.setName(name);
+        String email = dto.getEmail();
         if (email != null) {
             userRepository
                     .findByEmail(email)
@@ -111,11 +109,19 @@ public class UserService {
             foundUser.setEmail(email);
         }
 
-        User response = userRepository.save(foundUser);
-        return buildUserProfileResponseDto(response);
+        UserProfile profile = foundUser.getProfile();
+        if (dto.getFirstName() != null) profile.setFirstName(dto.getFirstName());
+        if (dto.getMiddleName() != null) profile.setMiddleName(dto.getMiddleName());
+        if (dto.getLastName() != null) profile.setLastName(dto.getLastName());
+        if (dto.getSuffix() != null) profile.setSuffix(dto.getSuffix());
+        if (dto.getPhone() != null) profile.setPhone(dto.getPhone());
+        if (dto.getStudentNumber() != null) profile.setStudentNumber(dto.getStudentNumber());
+        if (dto.getDepartment() != null) profile.setDepartment(dto.getDepartment());
+
+        return UserProfileResponseDto.from(foundUser);
     }
 
-    // Update password
+    @Transactional
     public UserProfileResponseDto updateUserPassword(Long id, UpdateUserPasswordRequestDto updateUserPasswordRequestDto) {
         User foundUser = userRepository
                 .findById(id)
@@ -124,29 +130,15 @@ public class UserService {
         if (!passwordEncoder.matches(updateUserPasswordRequestDto.getCurrentPassword(), foundUser.getHashedPassword()))
             throw new InvalidCredentialsException("Your current password doesn't matched");
 
-        String hashedPassword = passwordEncoder.encode(updateUserPasswordRequestDto.getPassword());
-        foundUser.setHashedPassword(hashedPassword);
+        foundUser.setHashedPassword(passwordEncoder.encode(updateUserPasswordRequestDto.getPassword()));
 
-        User user = userRepository.save(foundUser);
-        return buildUserProfileResponseDto(user);
+        return UserProfileResponseDto.from(foundUser);
     }
 
-    // Delete user
     public void deleteUser(Long id) {
         User foundUser = userRepository
                 .findById(id)
                 .orElseThrow(() -> new RowNotFoundException("Unable to find the user."));
         userRepository.delete(foundUser);
-    }
-
-    // ===== Service Utils =====
-    private UserProfileResponseDto buildUserProfileResponseDto(User user) {
-        return new UserProfileResponseDto(
-                user.getCreatedAt(),
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getUserRole()
-        );
     }
 }
