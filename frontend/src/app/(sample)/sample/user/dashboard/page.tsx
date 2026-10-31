@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export default function UserDashboardPage() {
   const router = useRouter();
@@ -50,9 +51,7 @@ export default function UserDashboardPage() {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [profileError, setProfileError] = useState<string | null>(null);
-  const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -104,7 +103,6 @@ export default function UserDashboardPage() {
   async function handleUpdateProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setProfileError(null);
-    setProfileMessage(null);
     setIsSavingProfile(true);
 
     try {
@@ -127,7 +125,7 @@ export default function UserDashboardPage() {
       setPhone(updatedProfile.profile?.phone ?? "");
       setStudentNumber(updatedProfile.profile?.studentNumber ?? "");
       setDepartment(updatedProfile.profile?.department ?? "");
-      setProfileMessage("Profile updated successfully.");
+      toast.success("Profile updated successfully.");
     } catch (cause: unknown) {
       setProfileError(cause instanceof Error ? cause.message : "Failed to update profile.");
     } finally {
@@ -138,7 +136,6 @@ export default function UserDashboardPage() {
   async function handleChangePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPasswordError(null);
-    setPasswordMessage(null);
     setIsChangingPassword(true);
 
     try {
@@ -146,7 +143,7 @@ export default function UserDashboardPage() {
       setCurrentPassword("");
       setPassword("");
       setPasswordConfirmation("");
-      setPasswordMessage("Password changed successfully.");
+      toast.success("Password changed successfully.");
     } catch (cause: unknown) {
       setPasswordError(cause instanceof Error ? cause.message : "Failed to change password.");
     } finally {
@@ -334,7 +331,6 @@ export default function UserDashboardPage() {
                       <Input id="profile-department" name="department" value={department} maxLength={100} onChange={(event) => setDepartment(event.target.value)} />
                     </Field>
                     {profileError && <FieldError>{profileError}</FieldError>}
-                    {profileMessage && <p role="status">{profileMessage}</p>}
                     <Button type="submit" isDisabled={isSavingProfile}>
                       {isSavingProfile ? "Saving profile..." : "Save profile"}
                     </Button>
@@ -364,7 +360,6 @@ export default function UserDashboardPage() {
                       <Input id="password-confirmation" name="passwordConfirmation" type="password" autoComplete="new-password" value={passwordConfirmation} onChange={(event) => setPasswordConfirmation(event.target.value)} />
                     </Field>
                     {passwordError && <FieldError>{passwordError}</FieldError>}
-                    {passwordMessage && <p role="status">{passwordMessage}</p>}
                     <Button type="submit" isDisabled={isChangingPassword}>
                       {isChangingPassword ? "Changing password..." : "Change password"}
                     </Button>
