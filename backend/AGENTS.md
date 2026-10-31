@@ -1,4 +1,4 @@
-# AGENTS.md — CampusTrack Backend
+﻿# AGENTS.md — CampusTrack Backend
 
 Campus Asset & Incident Management System. This file covers backend only (Spring Boot).
 
@@ -68,7 +68,7 @@ Folder names PascalCase and plural. Follow this exactly. No new top-level packag
 
 ## Domain model
 
-Tables: `buildings`, `rooms`, `assets`, `nfc_tags`, `incidents`, `maintenance_records`, `users`.
+Tables: `buildings`, `rooms`, `assets`, `nfc_tags`, `incidents`, `maintenance_records`, `users`, `user_profiles`.
 
 ```
 Building 1─* Room 1─* Asset 1─* NfcTag
@@ -76,6 +76,7 @@ Room 1─* Incident *─0..1 Asset
 Incident *─1 User (reported_by)
 Incident *─0..1 User (assigned_to)
 Incident 1─* MaintenanceRecord *─1 User
+User 1─1 UserProfile
 ```
 
 Key constraints:
@@ -84,6 +85,7 @@ Key constraints:
 - NfcTag: unique `uid`.
 - Incident: unique `incident_number`.
 - User: unique `email`. Store `password_hash` only. Never plaintext.
+- UserProfile: PK = FK to `users.id` (1-to-1, cascade delete). unique `student_number`. All fields optional except `first_name`, `last_name`. Index on `(last_name, first_name)`.
 - Asset: `brand`, `model`, `serial_number` optional.
 - Incident timestamps: `evaluated_at`, `resolved_at`, `closed_at`.
 - MaintenanceRecord: `completed_at`.
