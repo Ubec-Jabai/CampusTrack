@@ -39,6 +39,7 @@ export default function UserDashboardPage() {
   const [profile, setProfile] = useState<UserProfileResponseDto | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [avatarPath, setAvatarPath] = useState("");
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -65,6 +66,7 @@ export default function UserDashboardPage() {
     try {
       const data = await getProfile();
       setProfile(data);
+      setAvatarPath(data.profile?.avatarPath ?? "");
       setFirstName(data.profile?.firstName ?? "");
       setMiddleName(data.profile?.middleName ?? "");
       setLastName(data.profile?.lastName ?? "");
@@ -107,6 +109,7 @@ export default function UserDashboardPage() {
 
     try {
       const updatedProfile = await updateProfile({
+        avatarPath,
         firstName,
         middleName,
         lastName,
@@ -296,6 +299,10 @@ export default function UserDashboardPage() {
               <CardContent>
                 <form onSubmit={handleUpdateProfile} noValidate>
                   <FieldGroup className="gap-5">
+                    <Field>
+                      <FieldLabel htmlFor="profile-avatar-path">Avatar URL</FieldLabel>
+                      <Input id="profile-avatar-path" name="avatar" value={avatarPath} maxLength={100} onChange={(event) => setAvatarPath(event.target.value)} />
+                    </Field>
                     <Field>
                       <FieldLabel htmlFor="profile-first-name">First name</FieldLabel>
                       <Input id="profile-first-name" name="firstName" value={firstName} maxLength={100} onChange={(event) => setFirstName(event.target.value)} />

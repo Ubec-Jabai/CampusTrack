@@ -13,6 +13,7 @@ export interface ProfileDto {
 }
 
 export interface UpdateUserProfileRequestDto {
+  avatarPath?: string;
   email?: string;
   firstName?: string;
   middleName?: string;
