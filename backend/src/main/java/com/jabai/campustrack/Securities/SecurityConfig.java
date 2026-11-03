@@ -27,7 +27,7 @@ import java.util.List;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
-    private final String[] PUBLIC_PATHS = {"/api/auth/register", "/api/auth/login", "/error"};
+    private final String[] PUBLIC_PATHS = {"/api/health", "/api/auth/register", "/api/auth/login", "/error"};
     private final String[] DEV_OPEN_PATHS = {
             "/api/assets/**",
             "/api/buildings/**",
