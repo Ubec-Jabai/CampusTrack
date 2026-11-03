@@ -7,7 +7,6 @@ import com.jabai.campustrack.DTOs.Responses.RegisterUserResponseDto;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.jabai.campustrack.Services.UserService;
