@@ -35,26 +35,4 @@ public class AuthController {
     public ResponseEntity<LoginUserResponseDto> loginUser(@Valid @RequestBody LoginUserRequestDto loginUserRequestDto) {
         return ResponseEntity.ok(userService.loginUser(loginUserRequestDto));
     }
-
-    /**
-     * METHOD LEVEL AUTHORIZATION EXAMPLES
-     * Mga example ni sya bai
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin-only-test")
-    public ResponseEntity<String> adminRaniSyaBai() {
-        return ResponseEntity.ok().body("Hello world daw bai ana si admin");
-    }
-
-    @PreAuthorize("hasRole('WORKER')")
-    @GetMapping("/worker-only-test")
-    public ResponseEntity<String> workerRaniSyaBai() {
-        return ResponseEntity.ok().body("Hello world daw bai ana si worker");
-    }
-
-    @PreAuthorize("hasRole('STUDENT')")
-    @GetMapping("/user-only-test")
-    public ResponseEntity<String> userRaniSyaBai() {
-        return ResponseEntity.ok().body("Hello world daw bai ana si user");
-    }
 }
