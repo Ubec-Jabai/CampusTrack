@@ -33,6 +33,9 @@ public class UpdateUserProfileRequestDto {
   @Size(max = 100, message = "Department must be 100 characters or fewer.")
   private String department;
 
+  @Size(max = 500, message = "Avatar path must be 500 characters or fewer.")
+  private String avatarPath;
+
   public UpdateUserProfileRequestDto() {}
 
   public String getEmail() { return email; }
@@ -58,4 +61,7 @@ public class UpdateUserProfileRequestDto {
 
   public String getDepartment() { return department; }
   public void setDepartment(String department) { this.department = department; }
+
+  public String getAvatarPath() { return avatarPath; }
+  public void setAvatarPath(String avatarPath) { this.avatarPath = avatarPath; }
 }

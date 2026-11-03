@@ -117,6 +117,7 @@ public class UserService {
         if (dto.getPhone() != null) profile.setPhone(dto.getPhone());
         if (dto.getStudentNumber() != null) profile.setStudentNumber(dto.getStudentNumber());
         if (dto.getDepartment() != null) profile.setDepartment(dto.getDepartment());
+        if (dto.getAvatarPath() != null) profile.setAvatarPath(dto.getAvatarPath());
 
         return UserProfileResponseDto.from(foundUser);
     }
