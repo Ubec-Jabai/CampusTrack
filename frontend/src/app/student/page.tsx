@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function SamplePage() {
+export default function StudentPage() {
   return (
     <main className="py-12 space-y-16">
 
