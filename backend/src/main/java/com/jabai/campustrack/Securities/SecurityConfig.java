@@ -35,6 +35,7 @@ public class SecurityConfig {
             "/api/maintenance-records/**",
             "/api/nfc-tags/**",
             "/api/rooms/**",
+            "/api/worker-specialties/**",
             "/api/pdf-parser/**",
     };
     private final String[] ALLOWED_METHODS = {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"};
