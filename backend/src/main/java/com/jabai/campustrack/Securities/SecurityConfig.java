@@ -32,6 +32,7 @@ public class SecurityConfig {
             "/api/assets/**",
             "/api/buildings/**",
             "/api/incidents/**",
+            "/api/incident-status-histories/**",
             "/api/maintenance-records/**",
             "/api/nfc-tags/**",
             "/api/rooms/**",

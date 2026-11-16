@@ -50,4 +50,10 @@ public class IncidentStatusHistory {
   public IncidentStatus getToStatus() { return toStatus; }
   public User getChangedBy() { return changedBy; }
   public LocalDateTime getChangedAt() { return changedAt; }
+
+  // Setters
+  public void setIncident(Incident incident) { this.incident = incident; }
+  public void setFromStatus(IncidentStatus fromStatus) { this.fromStatus = fromStatus; }
+  public void setToStatus(IncidentStatus toStatus) { this.toStatus = toStatus; }
+  public void setChangedBy(User changedBy) { this.changedBy = changedBy; }
 }
