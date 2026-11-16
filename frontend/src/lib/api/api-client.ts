@@ -65,7 +65,7 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
       clearSession();
       if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
         // window.location.replace("/login");
-        window.location.replace("/sample/login"); // Temporary rani sya bai para sa sample type shit-
+        window.location.replace("/login");
       }
     }
 
