@@ -58,7 +58,7 @@ public class Incident {
   @Column(name = "incident_number", nullable = false, unique = true, length = 50)
   private String incidentNumber;
 
-  @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+  @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
   @Column(name = "safety_hazard", nullable = false)
@@ -70,20 +70,48 @@ public class Incident {
   @Column(name = "affected_area", nullable = false)
   private Integer affectedArea;
 
-  @Column(name = "priority_score", nullable = false)
-  private Integer priorityScore;
-
   @Enumerated(EnumType.STRING)
-  @Column(name = "category", nullable = false)
+  @Column(name = "category")
   private IncidentCategory category;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "priority", nullable = false)
+  @Column(name = "priority")
   private IncidentPriority priority;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
   private IncidentStatus status;
+
+  // Inspection
+  @Column(name = "photo_path", length = 500)
+  private String photoPath;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "inspected_by")
+  private User inspectedBy;
+
+  @Column(name = "inspected_at")
+  private LocalDateTime inspectedAt;
+
+  @Column(name = "asset_functional")
+  private Boolean assetFunctional;
+
+  // Review and assignment
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "reviewed_by")
+  private User reviewedBy;
+
+  @Column(name = "reviewed_at")
+  private LocalDateTime reviewedAt;
+
+  @Column(name = "approved_at")
+  private LocalDateTime approvedAt;
+
+  @Column(name = "assigned_at")
+  private LocalDateTime assignedAt;
+
+  @Column(name = "rejection_reason", length = 500)
+  private String rejectionReason;
 
   protected Incident() { }
 
@@ -95,7 +123,6 @@ public class Incident {
           boolean safetyHazard,
           boolean operationalImpact,
           int affectedArea,
-          int priorityScore,
           IncidentCategory category,
           IncidentPriority priority,
           IncidentStatus status
@@ -107,7 +134,6 @@ public class Incident {
     this.safetyHazard = safetyHazard;
     this.operationalImpact = operationalImpact;
     this.affectedArea = affectedArea;
-    this.priorityScore = priorityScore;
     this.category = category;
     this.priority = priority;
     this.status = status;
@@ -134,10 +160,18 @@ public class Incident {
   public boolean getSafetyHazard() { return safetyHazard; }
   public boolean getOperationalImpact() { return operationalImpact; }
   public Integer getAffectedArea() { return affectedArea; }
-  public Integer getPriorityScore() { return priorityScore; }
   public IncidentCategory getCategory() { return category; }
   public IncidentPriority getPriority() { return priority; }
   public IncidentStatus getStatus() { return status; }
+  public String getPhotoPath() { return photoPath; }
+  public User getInspectedBy() { return inspectedBy; }
+  public LocalDateTime getInspectedAt() { return inspectedAt; }
+  public Boolean getAssetFunctional() { return assetFunctional; }
+  public User getReviewedBy() { return reviewedBy; }
+  public LocalDateTime getReviewedAt() { return reviewedAt; }
+  public LocalDateTime getApprovedAt() { return approvedAt; }
+  public LocalDateTime getAssignedAt() { return assignedAt; }
+  public String getRejectionReason() { return rejectionReason; }
   public List<MaintenanceRecord> getMaintenanceRecords() { return maintenanceRecords; }
 
   // Setters
@@ -153,10 +187,18 @@ public class Incident {
   public void setSafetyHazard(boolean value) { safetyHazard = value; }
   public void setOperationalImpact(boolean value) { operationalImpact = value; }
   public void setAffectedArea(Integer value) { affectedArea = value; }
-  public void setPriorityScore(Integer value) { priorityScore = value; }
   public void setCategory(IncidentCategory value) { category = value; }
   public void setPriority(IncidentPriority value) { priority = value; }
   public void setStatus(IncidentStatus value) { status = value; }
+  public void setPhotoPath(String value) { photoPath = value; }
+  public void setInspectedBy(User value) { inspectedBy = value; }
+  public void setInspectedAt(LocalDateTime value) { inspectedAt = value; }
+  public void setAssetFunctional(Boolean value) { assetFunctional = value; }
+  public void setReviewedBy(User value) { reviewedBy = value; }
+  public void setReviewedAt(LocalDateTime value) { reviewedAt = value; }
+  public void setApprovedAt(LocalDateTime value) { approvedAt = value; }
+  public void setAssignedAt(LocalDateTime value) { assignedAt = value; }
+  public void setRejectionReason(String value) { rejectionReason = value; }
   public void removeMaintenanceRecord(MaintenanceRecord value) {
     maintenanceRecords.remove(value);
     value.setIncident(null);

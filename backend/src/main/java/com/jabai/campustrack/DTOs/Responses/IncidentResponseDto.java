@@ -26,7 +26,6 @@ public class IncidentResponseDto {
   private final String description;
   private final Boolean safetyHazard;
   private final Boolean operationalImpact;
-  private final Integer priorityScore;
   private final IncidentCategory category;
   private final IncidentPriority priority;
   private final IncidentStatus status;
@@ -45,7 +44,6 @@ public class IncidentResponseDto {
           String description,
           Boolean safetyHazard,
           Boolean operationalImpact,
-          Integer priorityScore,
           IncidentCategory category,
           IncidentPriority priority,
           IncidentStatus status
@@ -64,7 +62,6 @@ public class IncidentResponseDto {
     this.description = description;
     this.safetyHazard = safetyHazard;
     this.operationalImpact = operationalImpact;
-    this.priorityScore = priorityScore;
     this.category = category;
     this.priority = priority;
     this.status = status;
@@ -84,7 +81,6 @@ public class IncidentResponseDto {
           String description,
           Boolean safetyHazard,
           Boolean operationalImpact,
-          Integer priorityScore,
           IncidentCategory category,
           IncidentPriority priority,
           IncidentStatus status
@@ -103,7 +99,6 @@ public class IncidentResponseDto {
     this.description = description;
     this.safetyHazard = safetyHazard;
     this.operationalImpact = operationalImpact;
-    this.priorityScore = priorityScore;
     this.category = category;
     this.priority = priority;
     this.status = status;
@@ -123,7 +118,6 @@ public class IncidentResponseDto {
   public String getDescription() { return description; }
   public Boolean getSafetyHazard() { return safetyHazard; }
   public Boolean getOperationalImpact() { return operationalImpact; }
-  public Integer getPriorityScore() { return priorityScore; }
   public IncidentCategory getCategory() { return category; }
   public IncidentStatus getStatus() { return status; }
   public IncidentPriority getPriority() { return priority; }

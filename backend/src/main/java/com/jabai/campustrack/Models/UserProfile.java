@@ -44,6 +44,12 @@ public class UserProfile {
     @Column(name = "avatar_path", length = 500)
     private String avatarPath;
 
+    @Column(name = "available")
+    private Boolean available;
+
+    @Column(name = "last_assigned_at")
+    private LocalDateTime lastAssignedAt;
+
     protected UserProfile() {}
 
     public UserProfile(User user) {
@@ -62,6 +68,8 @@ public class UserProfile {
     public String getStudentNumber() { return studentNumber; }
     public String getDepartment() { return department; }
     public String getAvatarPath() { return avatarPath; }
+    public Boolean getAvailable() { return available; }
+    public LocalDateTime getLastAssignedAt() { return lastAssignedAt; }
 
     // Setters
     public void setUser(User user) { this.user = user; }
@@ -73,4 +81,6 @@ public class UserProfile {
     public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }
     public void setDepartment(String department) { this.department = department; }
     public void setAvatarPath(String avatarPath) { this.avatarPath = avatarPath; }
+    public void setAvailable(Boolean available) { this.available = available; }
+    public void setLastAssignedAt(LocalDateTime lastAssignedAt) { this.lastAssignedAt = lastAssignedAt; }
 }

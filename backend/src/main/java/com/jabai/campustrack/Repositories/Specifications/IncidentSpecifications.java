@@ -87,14 +87,6 @@ public class IncidentSpecifications {
         };
     }
 
-    public static Specification<Incident> hasPriorityScore(Integer priorityScore) {
-        return (root, query, cb) -> {
-            if (priorityScore == null)
-                return null;
-            return cb.equal(root.get("priorityScore"), priorityScore);
-        };
-    }
-
     public static Specification<Incident> hasCategory(IncidentCategory category) {
         return (root, query, cb) -> {
             if (category == null)

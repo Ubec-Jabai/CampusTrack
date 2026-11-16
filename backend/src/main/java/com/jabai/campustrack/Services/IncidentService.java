@@ -60,7 +60,6 @@ public class IncidentService {
         Long assetId = request.getAssetId();
         Long assignedToId = request.getAssignedToId();
         Integer affectedArea = request.getAffectedArea();
-        Integer priorityScore = request.getPriorityScore();
 
         LocalDateTime evaluatedAt = request.getEvaluatedAt();
         LocalDateTime resolvedAt = request.getResolvedAt();
@@ -81,7 +80,6 @@ public class IncidentService {
                 safetyHazard,
                 operationalImpact,
                 affectedArea,
-                priorityScore,
                 category,
                 priority,
                 status
@@ -140,7 +138,6 @@ public class IncidentService {
                 .and(IncidentSpecifications.hasSafetyHazard(request.getSafetyHazard()))
                 .and(IncidentSpecifications.hasOperationalImpact(request.getOperationalImpact()))
                 .and(IncidentSpecifications.hasAffectedArea(request.getAffectedArea()))
-                .and(IncidentSpecifications.hasPriorityScore(request.getPriorityScore()))
                 .and(IncidentSpecifications.hasCategory(request.getCategory()))
                 .and(IncidentSpecifications.hasPriority(request.getPriority()))
                 .and(IncidentSpecifications.hasStatus(request.getStatus()))
@@ -175,7 +172,6 @@ public class IncidentService {
         Boolean safetyHazard = request.getSafetyHazard();
         Boolean operationalImpact = request.getOperationalImpact();
         Integer affectedArea = request.getAffectedArea();
-        Integer priorityScore = request.getPriorityScore();
         LocalDateTime evaluatedAt = request.getEvaluatedAt();
         LocalDateTime resolvedAt = request.getResolvedAt();
         LocalDateTime closedAt = request.getClosedAt();
@@ -222,8 +218,6 @@ public class IncidentService {
             foundIncident.setOperationalImpact(operationalImpact);
         if (affectedArea != null)
             foundIncident.setAffectedArea(affectedArea);
-        if (priorityScore != null)
-            foundIncident.setPriorityScore(priorityScore);
         if (evaluatedAt != null)
             foundIncident.setEvaluatedAt(evaluatedAt);
         if (resolvedAt != null)
@@ -284,7 +278,6 @@ public class IncidentService {
                 incident.getDescription(),
                 incident.getSafetyHazard(),
                 incident.getOperationalImpact(),
-                incident.getPriorityScore(),
                 incident.getCategory(),
                 incident.getPriority(),
                 incident.getStatus()

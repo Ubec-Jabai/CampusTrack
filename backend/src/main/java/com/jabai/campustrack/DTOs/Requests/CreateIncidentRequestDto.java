@@ -39,9 +39,6 @@ public class CreateIncidentRequestDto {
     @NotNull(message = "Affected area is required.")
     private final Integer affectedArea;
 
-    @NotNull(message = "Priority score is required.")
-    private final Integer priorityScore;
-
     private final Long assetId;
     private final Long assignedToId;
     private final LocalDateTime evaluatedAt;
@@ -61,7 +58,6 @@ public class CreateIncidentRequestDto {
             Long assetId,
             Long assignedToId,
             Integer affectedArea,
-            Integer priorityScore,
             LocalDateTime evaluatedAt,
             LocalDateTime resolvedAt,
             LocalDateTime closedAt
@@ -78,7 +74,6 @@ public class CreateIncidentRequestDto {
         this.assetId = assetId;
         this.assignedToId = assignedToId;
         this.affectedArea = affectedArea;
-        this.priorityScore = priorityScore;
         this.evaluatedAt = evaluatedAt;
         this.resolvedAt = resolvedAt;
         this.closedAt = closedAt;
@@ -100,5 +95,4 @@ public class CreateIncidentRequestDto {
     public String getIncidentNumber() { return incidentNumber; }
     public IncidentPriority getPriority() { return priority; }
     public IncidentStatus getStatus() { return status; }
-    public Integer getPriorityScore() { return priorityScore; }
 }

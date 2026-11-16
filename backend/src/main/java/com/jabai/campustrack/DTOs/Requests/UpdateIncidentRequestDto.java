@@ -23,7 +23,6 @@ public class UpdateIncidentRequestDto {
   private final Boolean safetyHazard;
   private final Boolean operationalImpact;
   private final Integer affectedArea;
-  private final Integer priorityScore;
   private final LocalDateTime evaluatedAt;
   private final LocalDateTime resolvedAt;
   private final LocalDateTime closedAt;
@@ -39,7 +38,6 @@ public class UpdateIncidentRequestDto {
           Boolean safetyHazard,
           Boolean operationalImpact,
           Integer affectedArea,
-          Integer priorityScore,
           Long assetId,
           Long assignedToId,
           LocalDateTime evaluatedAt,
@@ -56,7 +54,6 @@ public class UpdateIncidentRequestDto {
     this.safetyHazard = safetyHazard;
     this.operationalImpact = operationalImpact;
     this.affectedArea = affectedArea;
-    this.priorityScore = priorityScore;
     this.assetId = assetId;
     this.assignedToId = assignedToId;
     this.evaluatedAt = evaluatedAt;
@@ -77,7 +74,6 @@ public class UpdateIncidentRequestDto {
   public Boolean getSafetyHazard() { return safetyHazard; }
   public Boolean getOperationalImpact() { return operationalImpact; }
   public Integer getAffectedArea() { return affectedArea; }
-  public Integer getPriorityScore() { return priorityScore; }
   public LocalDateTime getEvaluatedAt() { return evaluatedAt; }
   public LocalDateTime getResolvedAt() { return resolvedAt; }
   public LocalDateTime getClosedAt() { return closedAt; }

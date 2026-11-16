@@ -2,10 +2,12 @@ package com.jabai.campustrack.Models.Enums;
 
 public enum IncidentStatus {
   REPORTED,
-  EVALUATED,
+  INSPECTING,
+  REJECTED,
+  PENDING_REVIEW,
+  DECLINED,
+  APPROVED,
   ASSIGNED,
   IN_PROGRESS,
-  RESOLVED,
-  VERIFIED,
-  CLOSED
+  RESOLVED
 }

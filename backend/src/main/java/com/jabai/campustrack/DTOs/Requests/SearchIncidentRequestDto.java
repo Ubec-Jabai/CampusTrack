@@ -4,7 +4,6 @@ import com.jabai.campustrack.Models.Enums.IncidentCategory;
 import com.jabai.campustrack.Models.Enums.IncidentPriority;
 import com.jabai.campustrack.Models.Enums.IncidentStatus;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -36,9 +35,6 @@ public class SearchIncidentRequestDto {
     @Positive
     private final Integer affectedArea;
 
-    @PositiveOrZero
-    private final Integer priorityScore;
-
     private final IncidentCategory category;
     private final IncidentPriority priority;
     private final IncidentStatus status;
@@ -55,7 +51,6 @@ public class SearchIncidentRequestDto {
             Boolean safetyHazard,
             Boolean operationalImpact,
             Integer affectedArea,
-            Integer priorityScore,
             IncidentCategory category,
             IncidentPriority priority,
             IncidentStatus status
@@ -71,7 +66,6 @@ public class SearchIncidentRequestDto {
         this.safetyHazard = safetyHazard;
         this.operationalImpact = operationalImpact;
         this.affectedArea = affectedArea;
-        this.priorityScore = priorityScore;
         this.category = category;
         this.priority = priority;
         this.status = status;
@@ -89,7 +83,6 @@ public class SearchIncidentRequestDto {
     public Boolean getSafetyHazard() { return safetyHazard; }
     public Boolean getOperationalImpact() { return operationalImpact; }
     public Integer getAffectedArea() { return affectedArea; }
-    public Integer getPriorityScore() { return priorityScore; }
     public IncidentCategory getCategory() { return category; }
     public IncidentPriority getPriority() { return priority; }
     public IncidentStatus getStatus() { return status; }
