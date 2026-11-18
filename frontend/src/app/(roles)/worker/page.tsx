@@ -7,6 +7,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+export const instant = false;
+
 export default function WorkerPage() {
   return (
     <main className="py-12 space-y-16">
