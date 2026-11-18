@@ -4,7 +4,7 @@ import { EyeIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { AssetDeleteDialog } from "@/components/admin/admin-asset-delete-dialog";
 import { AssetFormDialog } from "@/components/admin/admin-asset-form-dialog";
 import { AssetViewDialog } from "@/components/admin/admin-asset-view-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -75,7 +75,21 @@ export function AssetsTable({
         {(asset) => (
           <TableRow id={asset.id}>
             <TableCell>{asset.name}</TableCell>
-            <TableCell>{asset.room?.roomNumber ?? "—"}</TableCell>
+            <TableCell>
+              {asset.room ? (
+                <LinkButton
+                  href={`/admin/rooms?roomNumber=${encodeURIComponent(
+                    asset.room.roomNumber
+                  )}`}
+                  variant="link"
+                  className="h-auto justify-start p-0"
+                >
+                  {asset.room.roomNumber}
+                </LinkButton>
+              ) : (
+                "—"
+              )}
+            </TableCell>
             <TableCell>{formatEnum(asset.category)}</TableCell>
             <TableCell>{formatEnum(asset.status)}</TableCell>
             <TableCell>{formatCreatedAt(asset.createdAt)}</TableCell>

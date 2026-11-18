@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { RoomFormDialog } from "@/components/admin/admin-room-form-dialog";
 import { RoomsTable } from "@/components/admin/admin-rooms-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -27,14 +28,20 @@ const EMPTY_FILTERS: RoomFilters = {
 };
 
 export function RoomsPageClient() {
+  const initialRoomNumber = useSearchParams().get("roomNumber") ?? "";
   const [rooms, setRooms] = useState<RoomResponseDto[]>([]);
   const [buildings, setBuildings] = useState<BuildingResponseDto[]>([]);
   const [buildingsError, setBuildingsError] = useState<string | null>(null);
   const [pageMeta, setPageMeta] = useState<PageMeta | null>(null);
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<RoomFilters>(EMPTY_FILTERS);
-  const [appliedFilters, setAppliedFilters] =
-    useState<RoomFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<RoomFilters>({
+    ...EMPTY_FILTERS,
+    roomNumber: initialRoomNumber,
+  });
+  const [appliedFilters, setAppliedFilters] = useState<RoomFilters>({
+    ...EMPTY_FILTERS,
+    roomNumber: initialRoomNumber,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,7 +80,11 @@ export function RoomsPageClient() {
   useEffect(() => {
     let ignore = false;
 
-    getRooms({ page: 1 })
+    const initialRequest = initialRoomNumber
+      ? searchRooms({ roomNumber: initialRoomNumber, page: 1 })
+      : getRooms({ page: 1 });
+
+    initialRequest
       .then((result) => {
         if (ignore) {
           return;
@@ -96,7 +107,7 @@ export function RoomsPageClient() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [initialRoomNumber]);
 
   useEffect(() => {
     let ignore = false;
