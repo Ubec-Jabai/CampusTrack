@@ -63,7 +63,8 @@ export function BuildingsTable({
           <TableRow id={building.id}>
             <TableCell>
               <RoomFormDialog
-                building={building}
+                buildings={buildings}
+                defaultBuildingId={building.id}
                 onSaved={onReload}
                 trigger={
                   <Button

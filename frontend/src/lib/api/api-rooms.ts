@@ -15,7 +15,7 @@ export type {
 };
 export { RoomCriticality, RoomType } from "@/types/room";
 
-const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 10;
 
 export interface PageParams {
   page?: number;

@@ -21,13 +21,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createRoom } from "@/lib/api/api-rooms";
+import { createRoom, updateRoom } from "@/lib/api/api-rooms";
 import type { BuildingResponseDto } from "@/types/building";
-import { RoomCriticality, RoomType } from "@/types/room";
+import {
+  RoomCriticality,
+  RoomType,
+  type RoomResponseDto,
+} from "@/types/room";
 
 interface RoomFormDialogProps {
   trigger: ReactNode;
-  building: BuildingResponseDto;
+  buildings: BuildingResponseDto[];
+  defaultBuildingId?: number;
+  room?: RoomResponseDto;
   onSaved: () => void;
 }
 
@@ -61,33 +67,56 @@ function isRoomCriticality(value: string): value is RoomCriticality {
 
 export function RoomFormDialog({
   trigger,
-  building,
+  buildings,
+  defaultBuildingId,
+  room,
   onSaved,
 }: RoomFormDialogProps) {
   const roomNumberId = useId();
   const capacityId = useId();
+  const initialBuildingId = room?.building.id ?? defaultBuildingId ?? null;
   const [isOpen, setIsOpen] = useState(false);
-  const [roomNumber, setRoomNumber] = useState("");
-  const [capacity, setCapacity] = useState("");
-  const [roomType, setRoomType] = useState<RoomType | null>(null);
-  const [criticality, setCriticality] = useState<RoomCriticality | null>(null);
+  const [buildingId, setBuildingId] = useState<number | null>(initialBuildingId);
+  const [roomNumber, setRoomNumber] = useState(room?.roomNumber ?? "");
+  const [capacity, setCapacity] = useState(
+    room ? String(room.capacity) : ""
+  );
+  const [roomType, setRoomType] = useState<RoomType | null>(
+    room?.roomType ?? null
+  );
+  const [criticality, setCriticality] = useState<RoomCriticality | null>(
+    room?.criticality ?? null
+  );
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isEditing = room !== undefined;
+  const submitLabel = isSubmitting
+    ? "Saving..."
+    : isEditing
+      ? "Save changes"
+      : "Create room";
 
   function handleOpenChange(open: boolean): void {
     setIsOpen(open);
 
     if (open) {
-      setRoomNumber("");
-      setCapacity("");
-      setRoomType(null);
-      setCriticality(null);
+      setBuildingId(room?.building.id ?? defaultBuildingId ?? null);
+      setRoomNumber(room?.roomNumber ?? "");
+      setCapacity(room ? String(room.capacity) : "");
+      setRoomType(room?.roomType ?? null);
+      setCriticality(room?.criticality ?? null);
       setError(null);
     }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (buildingId === null) {
+      setError("Building is required.");
+      return;
+    }
 
     const trimmedRoomNumber = roomNumber.trim();
     if (!trimmedRoomNumber) {
@@ -114,15 +143,23 @@ export function RoomFormDialog({
     setIsSubmitting(true);
     setError(null);
 
+    const payload = {
+      buildingId,
+      roomNumber: trimmedRoomNumber,
+      capacity: parsedCapacity,
+      roomType,
+      criticality,
+    };
+
     try {
-      await createRoom({
-        buildingId: building.id,
-        roomNumber: trimmedRoomNumber,
-        capacity: parsedCapacity,
-        roomType,
-        criticality,
-      });
-      toast.success("Room created.");
+      if (room) {
+        await updateRoom(room.id, payload);
+        toast.success("Room updated.");
+      } else {
+        await createRoom(payload);
+        toast.success("Room created.");
+      }
+
       setIsOpen(false);
       onSaved();
     } catch (cause: unknown) {
@@ -137,13 +174,39 @@ export function RoomFormDialog({
       {trigger}
       <Dialog isDismissable={!isSubmitting}>
         <DialogHeader>
-          <DialogTitle>New room</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit room" : "New room"}</DialogTitle>
           <DialogDescription>
-            Add a room to {building.name}.
+            {isEditing
+              ? "Update this room's details."
+              : "Add a new room to the campus."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} noValidate>
           <FieldGroup className="gap-5">
+            <Field>
+              <FieldLabel>Building</FieldLabel>
+              <Select
+                className="w-full"
+                placeholder="Select a building"
+                selectedKey={buildingId}
+                onSelectionChange={(key) => {
+                  if (typeof key === "number") {
+                    setBuildingId(key);
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {buildings.map((building) => (
+                    <SelectItem key={building.id} id={building.id}>
+                      {building.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
             <Field>
               <FieldLabel htmlFor={roomNumberId}>Room number</FieldLabel>
               <Input
@@ -220,7 +283,7 @@ export function RoomFormDialog({
                 Cancel
               </DialogClose>
               <Button type="submit" isDisabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Create room"}
+                {submitLabel}
               </Button>
             </DialogFooter>
           </FieldGroup>

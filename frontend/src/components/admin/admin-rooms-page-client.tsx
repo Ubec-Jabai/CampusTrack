@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { RoomFormDialog } from "@/components/admin/admin-room-form-dialog";
 import { RoomsTable } from "@/components/admin/admin-rooms-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { getBuildings } from "@/lib/api/api-buildings";
 import { getRooms, searchRooms } from "@/lib/api/api-rooms";
+import type { BuildingResponseDto } from "@/types/building";
 import type { RoomResponseDto } from "@/types/room";
 import type { PageMeta } from "@/types/page";
 
@@ -25,6 +28,8 @@ const EMPTY_FILTERS: RoomFilters = {
 
 export function RoomsPageClient() {
   const [rooms, setRooms] = useState<RoomResponseDto[]>([]);
+  const [buildings, setBuildings] = useState<BuildingResponseDto[]>([]);
+  const [buildingsError, setBuildingsError] = useState<string | null>(null);
   const [pageMeta, setPageMeta] = useState<PageMeta | null>(null);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<RoomFilters>(EMPTY_FILTERS);
@@ -93,6 +98,33 @@ export function RoomsPageClient() {
     };
   }, []);
 
+  useEffect(() => {
+    let ignore = false;
+
+    getBuildings({ page: 1, size: 100 })
+      .then((result) => {
+        if (ignore) {
+          return;
+        }
+
+        setBuildings(result.content);
+        setBuildingsError(null);
+      })
+      .catch((cause: unknown) => {
+        if (ignore) {
+          return;
+        }
+
+        setBuildingsError(
+          cause instanceof Error ? cause.message : "Failed to load buildings."
+        );
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   function refresh(targetPage: number, activeFilters: RoomFilters) {
     setIsLoading(true);
     setError(null);
@@ -119,6 +151,15 @@ export function RoomsPageClient() {
     refresh(page + 1, appliedFilters);
   }
 
+  function handleReload() {
+    refresh(page, appliedFilters);
+  }
+
+  function handleDeleted() {
+    const targetPage = rooms.length === 1 && page > 1 ? page - 1 : page;
+    refresh(targetPage, appliedFilters);
+  }
+
   const totalPages = pageMeta ? Math.max(pageMeta.totalPages, 1) : 1;
 
   return (
@@ -126,65 +167,81 @@ export function RoomsPageClient() {
       <div>
         <h1 className="text-4xl font-semibold">Rooms</h1>
         <p className="text-muted-foreground">
-          Browse and search rooms across campus buildings.
+          Create, update, and remove rooms across campus buildings.
         </p>
       </div>
 
-      <form
-        onSubmit={handleSearch}
-        noValidate
-        className="flex flex-col gap-3 sm:flex-row sm:items-end"
-      >
-        <Field className="sm:w-56">
-          <FieldLabel htmlFor="room-filter-number">Room number</FieldLabel>
-          <Input
-            id="room-filter-number"
-            name="roomNumber"
-            value={filters.roomNumber}
-            maxLength={50}
-            onChange={(event) =>
-              setFilters({ ...filters, roomNumber: event.target.value })
-            }
-          />
-        </Field>
-        <Field className="sm:w-44">
-          <FieldLabel htmlFor="room-filter-from">Created from</FieldLabel>
-          <Input
-            id="room-filter-from"
-            name="from"
-            type="date"
-            value={filters.from}
-            onChange={(event) =>
-              setFilters({ ...filters, from: event.target.value })
-            }
-          />
-        </Field>
-        <Field className="sm:w-44">
-          <FieldLabel htmlFor="room-filter-to">Created to</FieldLabel>
-          <Input
-            id="room-filter-to"
-            name="to"
-            type="date"
-            value={filters.to}
-            onChange={(event) =>
-              setFilters({ ...filters, to: event.target.value })
-            }
-          />
-        </Field>
-        <div className="flex gap-2">
-          <Button type="submit" isDisabled={isLoading}>
-            Search
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onPress={handleClear}
-            isDisabled={isLoading}
-          >
-            Clear
-          </Button>
-        </div>
-      </form>
+      {buildingsError && (
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load buildings</AlertTitle>
+          <AlertDescription>{buildingsError}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <form
+          onSubmit={handleSearch}
+          noValidate
+          className="flex flex-col gap-3 sm:flex-row sm:items-end"
+        >
+          <Field className="sm:w-56">
+            <FieldLabel htmlFor="room-filter-number">Room number</FieldLabel>
+            <Input
+              id="room-filter-number"
+              name="roomNumber"
+              value={filters.roomNumber}
+              maxLength={50}
+              onChange={(event) =>
+                setFilters({ ...filters, roomNumber: event.target.value })
+              }
+            />
+          </Field>
+          <Field className="sm:w-44">
+            <FieldLabel htmlFor="room-filter-from">Created from</FieldLabel>
+            <Input
+              id="room-filter-from"
+              name="from"
+              type="date"
+              value={filters.from}
+              onChange={(event) =>
+                setFilters({ ...filters, from: event.target.value })
+              }
+            />
+          </Field>
+          <Field className="sm:w-44">
+            <FieldLabel htmlFor="room-filter-to">Created to</FieldLabel>
+            <Input
+              id="room-filter-to"
+              name="to"
+              type="date"
+              value={filters.to}
+              onChange={(event) =>
+                setFilters({ ...filters, to: event.target.value })
+              }
+            />
+          </Field>
+          <div className="flex gap-2">
+            <Button type="submit" isDisabled={isLoading}>
+              Search
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onPress={handleClear}
+              isDisabled={isLoading}
+            >
+              Clear
+            </Button>
+          </div>
+        </form>
+        <RoomFormDialog
+          buildings={buildings}
+          onSaved={handleReload}
+          trigger={
+            <Button isDisabled={buildings.length === 0}>New room</Button>
+          }
+        />
+      </div>
 
       <Card>
         <CardContent>
@@ -211,7 +268,14 @@ export function RoomsPageClient() {
             </div>
           )}
 
-          {!isLoading && !error && <RoomsTable rooms={rooms} />}
+          {!isLoading && !error && (
+            <RoomsTable
+              rooms={rooms}
+              buildings={buildings}
+              onReload={handleReload}
+              onDeleted={handleDeleted}
+            />
+          )}
         </CardContent>
 
         {!isLoading && !error && (

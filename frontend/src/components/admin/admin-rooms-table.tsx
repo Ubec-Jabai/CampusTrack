@@ -1,5 +1,9 @@
 "use client";
 
+import { PencilIcon, Trash2Icon } from "lucide-react";
+import { RoomDeleteDialog } from "@/components/admin/admin-room-delete-dialog";
+import { RoomFormDialog } from "@/components/admin/admin-room-form-dialog";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,10 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { BuildingResponseDto } from "@/types/building";
 import type { RoomResponseDto } from "@/types/room";
 
 interface RoomsTableProps {
   rooms: RoomResponseDto[];
+  buildings: BuildingResponseDto[];
+  onReload: () => void;
+  onDeleted: () => void;
 }
 
 function formatCreatedAt(value: string): string {
@@ -35,7 +43,12 @@ function formatEnum(value: string): string {
     .join(" ");
 }
 
-export function RoomsTable({ rooms }: RoomsTableProps) {
+export function RoomsTable({
+  rooms,
+  buildings,
+  onReload,
+  onDeleted,
+}: RoomsTableProps) {
   return (
     <Table aria-label="Rooms">
       <TableHeader>
@@ -47,6 +60,9 @@ export function RoomsTable({ rooms }: RoomsTableProps) {
         <TableHead id="capacity">Capacity</TableHead>
         <TableHead id="criticality">Criticality</TableHead>
         <TableHead id="createdAt">Created</TableHead>
+        <TableHead id="actions" className="text-right">
+          Actions
+        </TableHead>
       </TableHeader>
       <TableBody
         items={rooms}
@@ -64,6 +80,37 @@ export function RoomsTable({ rooms }: RoomsTableProps) {
             <TableCell>{room.capacity}</TableCell>
             <TableCell>{formatEnum(room.criticality)}</TableCell>
             <TableCell>{formatCreatedAt(room.createdAt)}</TableCell>
+            <TableCell>
+              <div className="flex justify-end gap-1">
+                <RoomFormDialog
+                  room={room}
+                  buildings={buildings}
+                  onSaved={onReload}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Edit room ${room.roomNumber}`}
+                    >
+                      <PencilIcon aria-hidden="true" />
+                    </Button>
+                  }
+                />
+                <RoomDeleteDialog
+                  room={room}
+                  onDeleted={onDeleted}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Delete room ${room.roomNumber}`}
+                    >
+                      <Trash2Icon aria-hidden="true" />
+                    </Button>
+                  }
+                />
+              </div>
+            </TableCell>
           </TableRow>
         )}
       </TableBody>
