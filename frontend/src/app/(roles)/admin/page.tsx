@@ -9,7 +9,7 @@ import {
 
 export default function AdminPage() {
   return (
-    <main className="py-12 space-y-16">
+    <div className="py-12 space-y-16">
 
       <section className="max-w-7xl mx-auto px-4">
         <h1 className="text-2xl">Landing Page</h1>
@@ -40,6 +40,6 @@ export default function AdminPage() {
         </Card>
       </section>
 
-    </main>
+    </div>
   );
 }
