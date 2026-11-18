@@ -1,8 +1,8 @@
 "use client";
 
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import { BuildingDeleteDialog } from "./building-delete-dialog";
-import { BuildingFormDialog } from "./building-form-dialog";
+import { BuildingDeleteDialog } from "@/components/admin/admin-building-delete-dialog";
+import { BuildingFormDialog } from "@/components/admin/admin-building-form-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Table,

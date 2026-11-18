@@ -1,4 +1,4 @@
-import { BuildingsPageClient } from "./_components/buildings-page-client";
+import { BuildingsPageClient } from "@/components/admin/admin-buildings-page-client";
 
 export const instant = false;
 

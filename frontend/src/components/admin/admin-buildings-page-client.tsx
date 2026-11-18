@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { BuildingFormDialog } from "./building-form-dialog";
-import { BuildingsTable } from "./buildings-table";
+import { BuildingFormDialog } from "@/components/admin/admin-building-form-dialog";
+import { BuildingsTable } from "@/components/admin/admin-buildings-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
