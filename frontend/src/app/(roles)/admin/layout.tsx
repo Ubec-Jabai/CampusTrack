@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
         <AdminSidebar />
         <SidebarInset>
           <header className="flex h-14 items-center gap-2 border-b px-4">
-            <SidebarTrigger />
+            <SidebarTrigger className="md:hidden" />
             <Separator orientation="vertical" className="h-4" />
             <p className="font-medium">Admin Panel</p>
           </header>
