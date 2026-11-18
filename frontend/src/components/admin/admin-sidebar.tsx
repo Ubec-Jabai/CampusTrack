@@ -16,6 +16,7 @@ import {
 
 const navItems = [
   { href: "/admin/buildings", label: "Buildings" },
+  { href: "/admin/rooms", label: "Rooms" },
 ];
 
 export function AdminSidebar() {
