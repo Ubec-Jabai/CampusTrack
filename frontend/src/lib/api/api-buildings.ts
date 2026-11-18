@@ -14,7 +14,7 @@ export type {
   UpdateBuildingRequestDto,
 };
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 20;
 
 export interface PageParams {
   page?: number;

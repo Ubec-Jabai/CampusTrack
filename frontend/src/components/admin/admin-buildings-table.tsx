@@ -3,6 +3,7 @@
 import { PencilIcon, Trash2Icon } from "lucide-react";
 import { BuildingDeleteDialog } from "@/components/admin/admin-building-delete-dialog";
 import { BuildingFormDialog } from "@/components/admin/admin-building-form-dialog";
+import { RoomFormDialog } from "@/components/admin/admin-room-form-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -60,7 +61,21 @@ export function BuildingsTable({
       >
         {(building) => (
           <TableRow id={building.id}>
-            <TableCell>{building.name}</TableCell>
+            <TableCell>
+              <RoomFormDialog
+                building={building}
+                onSaved={onReload}
+                trigger={
+                  <Button
+                    variant="link"
+                    className="h-auto justify-start p-0"
+                    aria-label={`Add room to ${building.name}`}
+                  >
+                    {building.name}
+                  </Button>
+                }
+              />
+            </TableCell>
             <TableCell>{building.id}</TableCell>
             <TableCell>{formatCreatedAt(building.createdAt)}</TableCell>
             <TableCell>
