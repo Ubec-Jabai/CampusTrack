@@ -9,6 +9,8 @@ export interface ProfileDto {
   studentNumber: string | null;
   department: string | null;
   avatarPath: string | null;
+  available: boolean | null;
+  lastAssignedAt: string | null;
   createdAt: string;
 }
 
