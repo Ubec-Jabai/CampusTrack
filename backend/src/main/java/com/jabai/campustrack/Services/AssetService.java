@@ -19,10 +19,8 @@ import com.jabai.campustrack.Repositories.Specifications.AssetSpecifications;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -79,6 +77,7 @@ public class AssetService {
         String model = request.getModel();
         String serialNumber = request.getSerialNumber();
         AssetCategory category = request.getCategory();
+        AssetStatus status = request.getStatus();
         AssetCondition condition = request.getCondition();
         AssetCriticality criticality = request.getCriticality();
 
@@ -92,6 +91,7 @@ public class AssetService {
                 .and(AssetSpecifications.hasModelKeyword(model))
                 .and(AssetSpecifications.hasSerialNumber(serialNumber))
                 .and(AssetSpecifications.hasCategory(category))
+                .and(AssetSpecifications.hasStatus(status))
                 .and(AssetSpecifications.hasCondition(condition))
                 .and(AssetSpecifications.hasCriticality(criticality))
                 .and(AssetSpecifications.createdBetween(from, to));

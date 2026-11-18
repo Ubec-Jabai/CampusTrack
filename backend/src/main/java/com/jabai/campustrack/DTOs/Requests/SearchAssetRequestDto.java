@@ -3,6 +3,7 @@ package com.jabai.campustrack.DTOs.Requests;
 import com.jabai.campustrack.Models.Enums.AssetCategory;
 import com.jabai.campustrack.Models.Enums.AssetCondition;
 import com.jabai.campustrack.Models.Enums.AssetCriticality;
+import com.jabai.campustrack.Models.Enums.AssetStatus;
 import jakarta.validation.constraints.Positive;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -23,6 +24,7 @@ public class SearchAssetRequestDto {
     private final String model;
     private final String serialNumber;
     private final AssetCategory category;
+    private final AssetStatus status;
     private final AssetCondition condition;
     private final AssetCriticality criticality;
 
@@ -33,6 +35,7 @@ public class SearchAssetRequestDto {
             String model,
             String serialNumber,
             AssetCategory category,
+            AssetStatus status,
             AssetCondition condition,
             AssetCriticality criticality,
             LocalDate from,
@@ -44,6 +47,7 @@ public class SearchAssetRequestDto {
         this.model = model;
         this.serialNumber = serialNumber;
         this.category = category;
+        this.status = status;
         this.condition = condition;
         this.criticality = criticality;
         this.from = from;
@@ -57,6 +61,7 @@ public class SearchAssetRequestDto {
     public String getModel() { return model; }
     public String getSerialNumber() { return serialNumber; }
     public AssetCategory getCategory() { return category; }
+    public AssetStatus getStatus() { return status; }
     public AssetCondition getCondition() { return condition; }
     public AssetCriticality getCriticality() { return criticality; }
     public LocalDate getFrom() { return from; }

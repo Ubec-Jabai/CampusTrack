@@ -4,6 +4,7 @@ import com.jabai.campustrack.Models.Asset;
 import com.jabai.campustrack.Models.Enums.AssetCategory;
 import com.jabai.campustrack.Models.Enums.AssetCondition;
 import com.jabai.campustrack.Models.Enums.AssetCriticality;
+import com.jabai.campustrack.Models.Enums.AssetStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
@@ -76,6 +77,15 @@ public class AssetSpecifications {
             if (category == null)
                 return null;
             return cb.equal(root.get("category"), category);
+        };
+    }
+
+
+    public static Specification<Asset> hasStatus(AssetStatus status) {
+        return (root, query, cb) -> {
+            if (status == null)
+                return null;
+            return cb.equal(root.get("status"), status);
         };
     }
 
