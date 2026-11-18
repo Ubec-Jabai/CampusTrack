@@ -3,7 +3,7 @@
 import { PencilIcon, Trash2Icon } from "lucide-react";
 import { RoomDeleteDialog } from "@/components/admin/admin-room-delete-dialog";
 import { RoomFormDialog } from "@/components/admin/admin-room-form-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -75,7 +75,17 @@ export function RoomsTable({
         {(room) => (
           <TableRow id={room.id}>
             <TableCell>{room.roomNumber}</TableCell>
-            <TableCell>{room.building.name}</TableCell>
+            <TableCell>
+              <LinkButton
+                href={`/admin/buildings?name=${encodeURIComponent(
+                  room.building.name
+                )}`}
+                variant="link"
+                className="h-auto justify-start p-0"
+              >
+                {room.building.name}
+              </LinkButton>
+            </TableCell>
             <TableCell>{formatEnum(room.roomType)}</TableCell>
             <TableCell>{room.capacity}</TableCell>
             <TableCell>{formatEnum(room.criticality)}</TableCell>

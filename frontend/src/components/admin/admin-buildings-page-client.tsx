@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { BuildingFormDialog } from "@/components/admin/admin-building-form-dialog";
 import { BuildingsTable } from "@/components/admin/admin-buildings-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,12 +26,18 @@ const EMPTY_FILTERS: BuildingFilters = {
 };
 
 export function BuildingsPageClient() {
+  const initialName = useSearchParams().get("name") ?? "";
   const [buildings, setBuildings] = useState<BuildingResponseDto[]>([]);
   const [pageMeta, setPageMeta] = useState<PageMeta | null>(null);
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<BuildingFilters>(EMPTY_FILTERS);
-  const [appliedFilters, setAppliedFilters] =
-    useState<BuildingFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<BuildingFilters>({
+    ...EMPTY_FILTERS,
+    name: initialName,
+  });
+  const [appliedFilters, setAppliedFilters] = useState<BuildingFilters>({
+    ...EMPTY_FILTERS,
+    name: initialName,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,7 +76,11 @@ export function BuildingsPageClient() {
   useEffect(() => {
     let ignore = false;
 
-    getBuildings({ page: 1 })
+    const initialRequest = initialName
+      ? searchBuildings({ name: initialName, page: 1 })
+      : getBuildings({ page: 1 });
+
+    initialRequest
       .then((result) => {
         if (ignore) {
           return;
@@ -94,7 +105,7 @@ export function BuildingsPageClient() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [initialName]);
 
   function refresh(targetPage: number, activeFilters: BuildingFilters) {
     setIsLoading(true);
