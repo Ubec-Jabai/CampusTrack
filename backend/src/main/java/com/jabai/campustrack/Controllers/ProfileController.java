@@ -43,7 +43,7 @@ public class ProfileController {
     Long id = Long.parseLong(authentication.getName());
     UserProfileResponseDto updatedUserProfile = userService.updateUserProfile(id, request);
     return ResponseEntity.ok(updatedUserProfile);
-  } 
+  }
 
   // Change password
   @PatchMapping("/me/change-password")

@@ -1,25 +1,35 @@
 package com.jabai.campustrack.Services;
 
+import com.jabai.campustrack.DTOs.Requests.CreateUserRequestDto;
 import com.jabai.campustrack.DTOs.Requests.LoginUserRequestDto;
 import com.jabai.campustrack.DTOs.Requests.RegisterUserRequestDto;
+import com.jabai.campustrack.DTOs.Requests.SearchUserRequestDto;
 import com.jabai.campustrack.DTOs.Requests.UpdateUserPasswordRequestDto;
 import com.jabai.campustrack.DTOs.Requests.UpdateUserProfileRequestDto;
+import com.jabai.campustrack.DTOs.Requests.UpdateUserRequestDto;
 import com.jabai.campustrack.DTOs.Responses.LoginUserResponseDto;
 import com.jabai.campustrack.DTOs.Responses.RegisterUserResponseDto;
 import com.jabai.campustrack.DTOs.Responses.UserProfileResponseDto;
 
 import com.jabai.campustrack.Exceptions.CustomExceptions.DuplicatedRowException;
 import com.jabai.campustrack.Exceptions.CustomExceptions.RowNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jabai.campustrack.Repositories.UserRepository;
+import com.jabai.campustrack.Repositories.Specifications.UserSpecifications;
 import com.jabai.campustrack.Exceptions.CustomExceptions.InvalidCredentialsException;
 import com.jabai.campustrack.Securities.JwtUtil;
 import com.jabai.campustrack.Models.*;
 import com.jabai.campustrack.Models.Enums.UserRole;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 
 @Service
@@ -141,5 +151,82 @@ public class UserService {
                 .findById(id)
                 .orElseThrow(() -> new RowNotFoundException("Unable to find the user."));
         userRepository.delete(foundUser);
+    }
+
+    /**
+     * ========== USER MANAGEMENT ==========
+     * Para sa admin user controller
+     */
+
+    @Transactional
+    public UserProfileResponseDto createUser(CreateUserRequestDto dto) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent())
+            throw new DuplicatedRowException("This email already exists.");
+
+        String studentNumber = dto.getStudentNumber();
+        if (studentNumber != null && !studentNumber.isBlank()
+                && userRepository.existsByProfile_StudentNumber(studentNumber))
+            throw new DuplicatedRowException("This student number already exists.");
+
+        User user = new User(dto.getEmail(), passwordEncoder.encode(dto.getPassword()), dto.getUserRole());
+
+        UserProfile profile = new UserProfile(user);
+        profile.setFirstName(dto.getFirstName());
+        profile.setMiddleName(dto.getMiddleName());
+        profile.setLastName(dto.getLastName());
+        profile.setSuffix(dto.getSuffix());
+        profile.setPhone(dto.getPhone());
+        profile.setStudentNumber(studentNumber);
+        profile.setDepartment(dto.getDepartment());
+
+        user.setProfile(profile);
+        userRepository.save(user);
+
+        return UserProfileResponseDto.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserProfileResponseDto> getAllUsers(Pageable pageable) {
+        return userRepository
+                .findAll(pageable)
+                .map(UserProfileResponseDto::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserProfileResponseDto> searchUsers(SearchUserRequestDto request, Pageable pageable) {
+        LocalDate fromDate = request.getFrom();
+        LocalDate toDate = request.getTo();
+
+        LocalDateTime from = fromDate != null ? fromDate.atStartOfDay() : null;
+        LocalDateTime to = toDate != null ? toDate.atTime(LocalTime.MAX) : null;
+
+        Specification<User> specification = Specification
+                .where(UserSpecifications.hasFirstNameKeyword(request.getFirstName()))
+                .and(UserSpecifications.hasLastNameKeyword(request.getLastName()))
+                .and(UserSpecifications.hasEmailKeyword(request.getEmail()))
+                .and(UserSpecifications.hasRole(request.getUserRole()))
+                .and(UserSpecifications.hasStudentNumber(request.getStudentNumber()))
+                .and(UserSpecifications.hasDepartment(request.getDepartment()))
+                .and(UserSpecifications.hasCreatedAtRange(from, to));
+
+        return userRepository
+                .findAll(specification, pageable)
+                .map(UserProfileResponseDto::from);
+    }
+
+    @Transactional
+    public UserProfileResponseDto updateUser(Long id, UpdateUserRequestDto dto) {
+        User foundUser = userRepository
+                .findById(id)
+                .orElseThrow(() -> new RowNotFoundException("Unable to find the user."));
+
+        if (dto.getUserRole() != null) foundUser.setUserRole(dto.getUserRole());
+        if (dto.getPassword() != null) foundUser.setHashedPassword(passwordEncoder.encode(dto.getPassword()));
+
+        UserProfile profile = foundUser.getProfile();
+        if (dto.getAvailable() != null) profile.setAvailable(dto.getAvailable());
+        if (dto.getLastAssignedAt() != null) profile.setLastAssignedAt(dto.getLastAssignedAt());
+
+        return UserProfileResponseDto.from(foundUser);
     }
 }

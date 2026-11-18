@@ -49,6 +49,8 @@ public class UserProfileResponseDto {
         private String studentNumber;
         private String department;
         private String avatarPath;
+        private Boolean available;
+        private LocalDateTime lastAssignedAt;
         private LocalDateTime createdAt;
 
         public ProfileDto() {}
@@ -64,6 +66,8 @@ public class UserProfileResponseDto {
             dto.setStudentNumber(profile.getStudentNumber());
             dto.setDepartment(profile.getDepartment());
             dto.setAvatarPath(profile.getAvatarPath());
+            dto.setAvailable(profile.getAvailable());
+            dto.setLastAssignedAt(profile.getLastAssignedAt());
             dto.setCreatedAt(profile.getCreatedAt());
             return dto;
         }
@@ -91,6 +95,12 @@ public class UserProfileResponseDto {
 
         public String getAvatarPath() { return avatarPath; }
         public void setAvatarPath(String avatarPath) { this.avatarPath = avatarPath; }
+
+        public Boolean getAvailable() { return available; }
+        public void setAvailable(Boolean available) { this.available = available; }
+
+        public LocalDateTime getLastAssignedAt() { return lastAssignedAt; }
+        public void setLastAssignedAt(LocalDateTime lastAssignedAt) { this.lastAssignedAt = lastAssignedAt; }
 
         public LocalDateTime getCreatedAt() { return createdAt; }
         public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
