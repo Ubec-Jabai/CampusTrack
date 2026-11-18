@@ -17,6 +17,7 @@ import {
 const navItems = [
   { href: "/admin/buildings", label: "Buildings" },
   { href: "/admin/rooms", label: "Rooms" },
+  { href: "/admin/assets", label: "Assets" },
 ];
 
 export function AdminSidebar() {
