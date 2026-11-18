@@ -1,6 +1,7 @@
 "use client";
 
 import { PencilIcon, Trash2Icon } from "lucide-react";
+import { AssetFormDialog } from "@/components/admin/admin-asset-form-dialog";
 import { RoomDeleteDialog } from "@/components/admin/admin-room-delete-dialog";
 import { RoomFormDialog } from "@/components/admin/admin-room-form-dialog";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -74,7 +75,22 @@ export function RoomsTable({
       >
         {(room) => (
           <TableRow id={room.id}>
-            <TableCell>{room.roomNumber}</TableCell>
+            <TableCell>
+              <AssetFormDialog
+                rooms={rooms}
+                defaultRoomId={room.id}
+                onSaved={onReload}
+                trigger={
+                  <Button
+                    variant="link"
+                    className="h-auto justify-start p-0"
+                    aria-label={`Add asset to room ${room.roomNumber}`}
+                  >
+                    {room.roomNumber}
+                  </Button>
+                }
+              />
+            </TableCell>
             <TableCell>
               <LinkButton
                 href={`/admin/buildings?name=${encodeURIComponent(

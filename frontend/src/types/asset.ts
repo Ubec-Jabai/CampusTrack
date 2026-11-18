@@ -80,6 +80,7 @@ export interface SearchAssetParams {
   model?: string;
   serialNumber?: string;
   category?: AssetCategory;
+  status?: AssetStatus;
   condition?: AssetCondition;
   criticality?: AssetCriticality;
   from?: string;

@@ -43,6 +43,7 @@ interface AssetFormDialogProps {
   trigger: ReactNode;
   rooms: RoomResponseDto[];
   asset?: AssetResponseDto;
+  defaultRoomId?: number;
   onSaved: () => void;
 }
 
@@ -50,6 +51,7 @@ export function AssetFormDialog({
   trigger,
   rooms,
   asset,
+  defaultRoomId,
   onSaved,
 }: AssetFormDialogProps) {
   const nameId = useId();
@@ -58,7 +60,7 @@ export function AssetFormDialog({
   const serialNumberId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [roomId, setRoomId] = useState<number | null>(
-    asset?.room?.id ?? null
+    asset?.room?.id ?? defaultRoomId ?? null
   );
   const [name, setName] = useState(asset?.name ?? "");
   const [brand, setBrand] = useState(asset?.brand ?? "");
@@ -92,7 +94,7 @@ export function AssetFormDialog({
     setIsOpen(open);
 
     if (open) {
-      setRoomId(asset?.room?.id ?? null);
+      setRoomId(asset?.room?.id ?? defaultRoomId ?? null);
       setName(asset?.name ?? "");
       setBrand(asset?.brand ?? "");
       setModel(asset?.model ?? "");

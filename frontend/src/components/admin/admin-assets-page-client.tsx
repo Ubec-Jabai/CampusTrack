@@ -8,6 +8,7 @@ import {
   ASSET_CATEGORY_OPTIONS,
   ASSET_CONDITION_OPTIONS,
   ASSET_CRITICALITY_OPTIONS,
+  ASSET_STATUS_OPTIONS,
   isOptionValue,
 } from "@/components/admin/admin-asset-options";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -28,6 +29,7 @@ import {
   AssetCategory,
   AssetCondition,
   AssetCriticality,
+  AssetStatus,
   type AssetResponseDto,
 } from "@/types/asset";
 import type { RoomResponseDto } from "@/types/room";
@@ -40,6 +42,7 @@ interface AssetFilters {
   model: string;
   serialNumber: string;
   category: AssetCategory | null;
+  status: AssetStatus | null;
   condition: AssetCondition | null;
   criticality: AssetCriticality | null;
   from: string;
@@ -53,6 +56,7 @@ const EMPTY_FILTERS: AssetFilters = {
   model: "",
   serialNumber: "",
   category: null,
+  status: null,
   condition: null,
   criticality: null,
   from: "",
@@ -67,6 +71,7 @@ function hasActiveFilters(filters: AssetFilters): boolean {
     filters.model !== "" ||
     filters.serialNumber !== "" ||
     filters.category !== null ||
+    filters.status !== null ||
     filters.condition !== null ||
     filters.criticality !== null ||
     filters.from !== "" ||
@@ -112,6 +117,7 @@ export function AssetsPageClient() {
               model: activeFilters.model || undefined,
               serialNumber: activeFilters.serialNumber || undefined,
               category: activeFilters.category ?? undefined,
+              status: activeFilters.status ?? undefined,
               condition: activeFilters.condition ?? undefined,
               criticality: activeFilters.criticality ?? undefined,
               from: activeFilters.from || undefined,
@@ -335,6 +341,35 @@ export function AssetsPageClient() {
                 <SelectContent>
                   <SelectItem id={0}>Any category</SelectItem>
                   {ASSET_CATEGORY_OPTIONS.map((option) => (
+                    <SelectItem key={option.id} id={option.id}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <FieldLabel>Status</FieldLabel>
+              <Select
+                className="w-full"
+                selectedKey={filters.status ?? 0}
+                onSelectionChange={(key) => {
+                  if (key === 0) {
+                    setFilters({ ...filters, status: null });
+                  } else if (
+                    typeof key === "string" &&
+                    isOptionValue(ASSET_STATUS_OPTIONS, key)
+                  ) {
+                    setFilters({ ...filters, status: key });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem id={0}>Any status</SelectItem>
+                  {ASSET_STATUS_OPTIONS.map((option) => (
                     <SelectItem key={option.id} id={option.id}>
                       {option.label}
                     </SelectItem>
