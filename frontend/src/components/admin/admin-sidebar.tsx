@@ -1,9 +1,12 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { LogOutIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { logout } from "@/lib/api/api-auth";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -24,6 +27,12 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -53,6 +62,20 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Log out"
+              onPress={handleLogout}
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <LogOutIcon aria-hidden="true" />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );
