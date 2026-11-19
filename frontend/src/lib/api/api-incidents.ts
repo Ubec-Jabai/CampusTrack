@@ -1,4 +1,4 @@
-import { apiClient } from "./api-client";
+import { apiClient, apiFetch } from "./api-client";
 import type { PageResponse } from "@/types/page";
 import type {
   CreateIncidentRequestDto,
@@ -95,9 +95,20 @@ export async function searchIncidents(
 }
 
 export async function createIncident(
-  data: CreateIncidentRequestDto
+  data: CreateIncidentRequestDto,
+  image: File
 ): Promise<IncidentResponseDto> {
-  return apiClient.post<IncidentResponseDto>("/api/incidents", data);
+  const formData = new FormData();
+  formData.append(
+    "incident",
+    new Blob([JSON.stringify(data)], { type: "application/json" })
+  );
+  formData.append("image", image);
+
+  return apiFetch<IncidentResponseDto>("/api/incidents", {
+    method: "POST",
+    body: formData,
+  });
 }
 
 export async function updateIncident(
@@ -126,6 +137,6 @@ export default incidentsApi;
 // const incidents = await incidentsApi.getIncidents({ page: 1 });
 // const incident = await incidentsApi.getIncident(1);
 // const found = await incidentsApi.searchIncidents({ roomId: 1, status: IncidentStatus.REPORTED, safetyHazard: true });
-// const created = await incidentsApi.createIncident({ roomId: 1, reportedById: 1, category: IncidentCategory.EQUIPMENT_FAILURE, priority: IncidentPriority.HIGH, status: IncidentStatus.REPORTED, incidentNumber: "INC-001", description: "Projector not turning on", safetyHazard: false, operationalImpact: true, affectedArea: 40 });
+// const created = await incidentsApi.createIncident({ roomId: 1, reportedById: 1, category: IncidentCategory.EQUIPMENT_FAILURE, priority: IncidentPriority.HIGH, status: IncidentStatus.REPORTED, incidentNumber: "INC-001", description: "Projector not turning on", safetyHazard: false, operationalImpact: true, affectedArea: 40 }, imageFile);
 // const updated = await incidentsApi.updateIncident(1, { status: IncidentStatus.IN_PROGRESS, assignedToId: 2 });
 // await incidentsApi.deleteIncident(1);

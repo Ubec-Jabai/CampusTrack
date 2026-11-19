@@ -64,6 +64,7 @@ export function IncidentFormDialog({
   const incidentNumberId = useId();
   const descriptionId = useId();
   const affectedAreaId = useId();
+  const photoId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [roomId, setRoomId] = useState<number | null>(
     incident?.room?.id ?? incident?.roomId ?? null
@@ -93,6 +94,7 @@ export function IncidentFormDialog({
     incident?.operationalImpact ?? null
   );
   const [affectedArea, setAffectedArea] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -119,6 +121,7 @@ export function IncidentFormDialog({
       setSafetyHazard(incident?.safetyHazard ?? null);
       setOperationalImpact(incident?.operationalImpact ?? null);
       setAffectedArea("");
+      setPhoto(null);
       setError(null);
     }
   }
@@ -213,18 +216,26 @@ export function IncidentFormDialog({
         await updateIncident(incident.id, payload);
         toast.success("Incident updated.");
       } else {
-        await createIncident({
-          roomId,
-          reportedById,
-          category,
-          priority,
-          status,
-          incidentNumber: trimmedIncidentNumber,
-          description: trimmedDescription,
-          safetyHazard,
-          operationalImpact,
-          affectedArea: parsedAffectedArea,
-        });
+        if (photo === null) {
+          setError("Photo is required.");
+          return;
+        }
+
+        await createIncident(
+          {
+            roomId,
+            reportedById,
+            category,
+            priority,
+            status,
+            incidentNumber: trimmedIncidentNumber,
+            description: trimmedDescription,
+            safetyHazard,
+            operationalImpact,
+            affectedArea: parsedAffectedArea,
+          },
+          photo
+        );
         toast.success("Incident created.");
       }
 
@@ -451,6 +462,21 @@ export function IncidentFormDialog({
                 required={!isEditing}
               />
             </Field>
+            {!isEditing && (
+              <Field>
+                <FieldLabel htmlFor={photoId}>Photo</FieldLabel>
+                <Input
+                  id={photoId}
+                  name="image"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) =>
+                    setPhoto(event.target.files?.[0] ?? null)
+                  }
+                  required
+                />
+              </Field>
+            )}
             {error && <FieldError>{error}</FieldError>}
             <DialogFooter>
               <DialogClose variant="outline" isDisabled={isSubmitting}>
