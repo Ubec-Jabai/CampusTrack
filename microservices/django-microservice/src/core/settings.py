@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "health",
     "pdf_parser",
+    "incident_photo",
     "corsheaders"
 ]
 
@@ -59,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "pdf_parser.middleware.PdfParserMiddleware",
+    "incident_photo.middleware.IncidentPhotoMiddleware",
 ]
 
 # JWT

@@ -25,5 +25,6 @@ urlpatterns = [
     path("api/health/", include("health.urls")),
 
     # API
-    path("api/pdf-parser/", include("pdf_parser.urls"))
+    path("api/pdf-parser/", include("pdf_parser.urls")),
+    path("api/incident-photo/", include("incident_photo.urls"))
 ]
