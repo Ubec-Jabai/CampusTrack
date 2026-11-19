@@ -18,6 +18,7 @@ const navItems = [
   { href: "/admin/buildings", label: "Buildings" },
   { href: "/admin/rooms", label: "Rooms" },
   { href: "/admin/assets", label: "Assets" },
+  { href: "/admin/incidents", label: "Incidents" },
   { href: "/admin/users", label: "Users" },
 ];
 
