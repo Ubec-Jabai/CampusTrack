@@ -16,12 +16,15 @@ import com.jabai.campustrack.Models.Room;
 import com.jabai.campustrack.Models.User;
 import com.jabai.campustrack.Models.Enums.IncidentPriority;
 import com.jabai.campustrack.Models.Enums.IncidentStatus;
+import com.jabai.campustrack.Models.Enums.Specialty;
+import com.jabai.campustrack.Models.Enums.UserRole;
 import com.jabai.campustrack.Repositories.AssetRepository;
 import com.jabai.campustrack.Repositories.IncidentRepository;
 import com.jabai.campustrack.Repositories.RoomRepository;
 import com.jabai.campustrack.Repositories.Specifications.IncidentSpecifications;
 import com.jabai.campustrack.Repositories.UserRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -91,14 +96,17 @@ public class IncidentService {
         if (assetId != null) {
             Asset foundAsset = assetRepository
                     .findById(assetId)
-                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the asset with an ID of %d.", reportedById)));
+                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the asset with an ID of %d.", assetId)));
             incident.setAsset(foundAsset);
+
+            if (assignedToId == null && status == IncidentStatus.REPORTED)
+                autoAssignToWorker(incident, foundAsset.getSpecialty());
         }
         if (assignedToId != null) {
             User foundAssignedToUser = userRepository
                     .findById(assignedToId)
-                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", reportedById)));
-            incident.setAssignedTo(foundAssignedToUser);
+                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", assignedToId)));
+            assignIncident(incident, foundAssignedToUser);
         }
         if (evaluatedAt != null)
             incident.setEvaluatedAt(evaluatedAt);
@@ -186,7 +194,7 @@ public class IncidentService {
             User user = userRepository
                     .findById(reportedById)
                     .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", reportedById)));
-            foundIncident.setAssignedTo(user);
+            foundIncident.setReportedBy(user);
         }
         if (assetId != null) {
             Asset asset = assetRepository
@@ -198,7 +206,7 @@ public class IncidentService {
             User user = userRepository
                     .findById(assignedToId)
                     .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", assignedToId)));
-            foundIncident.setAssignedTo(user);
+            assignIncident(foundIncident, user);
         }
         if (category != null)
             foundIncident.setCategory(category);
@@ -238,6 +246,37 @@ public class IncidentService {
     }
 
     // ===== Service Utils =====
+
+    private void autoAssignToWorker(Incident incident, Specialty specialty) {
+        if (specialty == null) return;
+
+        List<User> candidates = userRepository.findAvailableWorkersBySpecialty(
+                specialty, UserRole.WORKER, PageRequest.of(0, 1));
+        if (candidates.isEmpty()) return;
+
+        assignIncident(incident, candidates.getFirst());
+    }
+
+    private void assignIncident(Incident incident, User worker) {
+        boolean changed = incident.getAssignedTo() == null
+                || !Objects.equals(incident.getAssignedTo().getId(), worker.getId());
+
+        incident.setAssignedTo(worker);
+        if (!changed) return;
+
+        LocalDateTime now = LocalDateTime.now();
+        incident.setAssignedAt(now);
+
+        if (incident.getStatus() == IncidentStatus.REPORTED
+                || incident.getStatus() == IncidentStatus.PENDING_REVIEW
+                || incident.getStatus() == IncidentStatus.APPROVED) {
+            incident.setStatus(IncidentStatus.ASSIGNED);
+        }
+
+        if (worker.getUserRole() == UserRole.WORKER && worker.getProfile() != null) {
+            worker.getProfile().setLastAssignedAt(now);
+        }
+    }
 
     // used by @PreAuthorize in the controller - CHRIS CHAN
     @Transactional(readOnly = true)
@@ -295,10 +334,14 @@ public class IncidentService {
                     asset.getStatus(),
                     asset.getCondition(),
                     asset.getCriticality(),
-                    asset.getCreatedAt()
+                    asset.getCreatedAt(),
+                    asset.getSpecialty()
             ));
-        if (assignedTo != null)
+        if (assignedTo != null) {
             incidentResponseDto.setAssigned(UserProfileResponseDto.from(assignedTo));
+            incidentResponseDto.setAssignedToId(assignedTo.getId());
+        }
+        incidentResponseDto.setAssignedAt(incident.getAssignedAt());
 
         return incidentResponseDto;
     }

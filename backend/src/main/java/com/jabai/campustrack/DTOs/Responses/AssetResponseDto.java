@@ -4,6 +4,7 @@ import com.jabai.campustrack.Models.Enums.AssetCategory;
 import com.jabai.campustrack.Models.Enums.AssetCondition;
 import com.jabai.campustrack.Models.Enums.AssetCriticality;
 import com.jabai.campustrack.Models.Enums.AssetStatus;
+import com.jabai.campustrack.Models.Enums.Specialty;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +21,7 @@ public class AssetResponseDto {
     private final AssetStatus status;
     private final AssetCondition condition;
     private final AssetCriticality criticality;
+    private final Specialty specialty;
     private final LocalDateTime createdAt;
 
     public AssetResponseDto(
@@ -33,7 +35,8 @@ public class AssetResponseDto {
             AssetStatus status,
             AssetCondition condition,
             AssetCriticality criticality,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            Specialty specialty
     ) {
         this.id = id;
         this.room = room;
@@ -46,6 +49,7 @@ public class AssetResponseDto {
         this.status = status;
         this.condition = condition;
         this.criticality = criticality;
+        this.specialty = specialty;
         this.createdAt = createdAt;
     }
 
@@ -60,7 +64,8 @@ public class AssetResponseDto {
             AssetStatus status,
             AssetCondition condition,
             AssetCriticality criticality,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            Specialty specialty
     ) {
         this.id = id;
         this.room = null;
@@ -73,6 +78,7 @@ public class AssetResponseDto {
         this.status = status;
         this.condition = condition;
         this.criticality = criticality;
+        this.specialty = specialty;
         this.createdAt = createdAt;
     }
 
@@ -86,6 +92,7 @@ public class AssetResponseDto {
     public AssetStatus getStatus() { return status; }
     public AssetCondition getCondition() { return condition; }
     public AssetCriticality getCriticality() { return criticality; }
+    public Specialty getSpecialty() { return specialty; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public Long getRoomId() { return roomId; }
 }

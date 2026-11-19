@@ -178,6 +178,7 @@ public class UserService {
         profile.setPhone(dto.getPhone());
         profile.setStudentNumber(studentNumber);
         profile.setDepartment(dto.getDepartment());
+        if (dto.getUserRole() == UserRole.WORKER) profile.setAvailable(true);
 
         user.setProfile(profile);
         userRepository.save(user);

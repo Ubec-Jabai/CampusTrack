@@ -4,6 +4,7 @@ import com.jabai.campustrack.Models.Enums.AssetCategory;
 import com.jabai.campustrack.Models.Enums.AssetStatus;
 import com.jabai.campustrack.Models.Enums.AssetCondition;
 import com.jabai.campustrack.Models.Enums.AssetCriticality;
+import com.jabai.campustrack.Models.Enums.Specialty;
 
 public class UpdateAssetRequestDto {
   private final Long roomId;
@@ -15,6 +16,7 @@ public class UpdateAssetRequestDto {
   private final AssetStatus status;
   private final AssetCondition condition;
   private final AssetCriticality criticality;
+  private final Specialty specialty;
 
   public UpdateAssetRequestDto(
           Long roomId,
@@ -25,7 +27,8 @@ public class UpdateAssetRequestDto {
           AssetCategory category,
           AssetStatus status,
           AssetCondition condition,
-          AssetCriticality criticality
+          AssetCriticality criticality,
+          Specialty specialty
   ) {
     this.roomId = roomId;
     this.name = name;
@@ -36,6 +39,7 @@ public class UpdateAssetRequestDto {
     this.status = status;
     this.condition = condition;
     this.criticality = criticality;
+    this.specialty = specialty;
   }
 
   public Long getRoomId() { return roomId; }
@@ -47,4 +51,5 @@ public class UpdateAssetRequestDto {
   public AssetStatus getStatus() { return status; }
   public AssetCondition getCondition() { return condition; }
   public AssetCriticality getCriticality() { return criticality; }
+  public Specialty getSpecialty() { return specialty; }
 }

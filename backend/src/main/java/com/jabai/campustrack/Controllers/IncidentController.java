@@ -59,7 +59,7 @@ public class IncidentController {
 
   // Update
   // admin or the owner of the incident only - CHRIS CHAN
-  @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('WORKER', 'STUDENT') and @incidentService.isOwner(#id, authentication.name))")
+  @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('WORKER', 'STUDENT') and #request.assignedToId == null and @incidentService.isOwner(#id, authentication.name))")
   @PatchMapping("/{id}")
   public ResponseEntity<IncidentResponseDto> updateIncident(@PathVariable Long id, @Valid @RequestBody UpdateIncidentRequestDto request) {
     return ResponseEntity.ok(incidentService.updateIncident(id, request));

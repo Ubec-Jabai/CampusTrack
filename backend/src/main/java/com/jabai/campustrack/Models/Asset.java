@@ -4,6 +4,7 @@ import com.jabai.campustrack.Models.Enums.AssetCategory;
 import com.jabai.campustrack.Models.Enums.AssetCondition;
 import com.jabai.campustrack.Models.Enums.AssetCriticality;
 import com.jabai.campustrack.Models.Enums.AssetStatus;
+import com.jabai.campustrack.Models.Enums.Specialty;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -59,6 +60,10 @@ public class Asset {
   @Column(name = "criticality", nullable = false)
   private AssetCriticality criticality;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "specialty", nullable = false, length = 50)
+  private Specialty specialty;
+
   protected Asset() { }
 
   public Asset(
@@ -67,7 +72,8 @@ public class Asset {
           AssetCategory category,
           AssetStatus status,
           AssetCondition condition,
-          AssetCriticality criticality
+          AssetCriticality criticality,
+          Specialty specialty
   ) {
     this.room = room;
     this.name = name;
@@ -78,6 +84,7 @@ public class Asset {
     this.status = status;
     this.condition = condition;
     this.criticality = criticality;
+    this.specialty = specialty;
   }
 
   public Asset(
@@ -89,7 +96,8 @@ public class Asset {
           AssetCategory category,
           AssetStatus status,
           AssetCondition condition,
-          AssetCriticality criticality
+          AssetCriticality criticality,
+          Specialty specialty
   ) {
     this.room = room;
     this.name = name;
@@ -100,6 +108,7 @@ public class Asset {
     this.status = status;
     this.condition = condition;
     this.criticality = criticality;
+    this.specialty = specialty;
   }
 
   // Getters
@@ -115,6 +124,7 @@ public class Asset {
   public AssetStatus getStatus() { return status; }
   public AssetCondition getCondition() { return condition; }
   public AssetCriticality getCriticality() { return criticality; }
+  public Specialty getSpecialty() { return specialty; }
 
   // Setters
   public void setRoom(Room value) { room = value; }
@@ -126,6 +136,7 @@ public class Asset {
   public void setStatus(AssetStatus value) { status = value; }
   public void setCondition(AssetCondition value) { condition = value; }
   public void setCriticality(AssetCriticality value) { criticality = value; }
+  public void setSpecialty(Specialty value) { specialty = value; }
   public void removeNfcTag(NfcTag value) {
     nfcTags.remove(value);
     value.setAsset(null);

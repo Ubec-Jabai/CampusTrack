@@ -11,6 +11,7 @@ import com.jabai.campustrack.Models.Enums.AssetCategory;
 import com.jabai.campustrack.Models.Enums.AssetCondition;
 import com.jabai.campustrack.Models.Enums.AssetCriticality;
 import com.jabai.campustrack.Models.Enums.AssetStatus;
+import com.jabai.campustrack.Models.Enums.Specialty;
 import com.jabai.campustrack.Models.Room;
 import com.jabai.campustrack.Repositories.AssetRepository;
 import com.jabai.campustrack.Repositories.RoomRepository;
@@ -48,12 +49,16 @@ public class AssetService {
         AssetStatus status = request.getStatus();
         AssetCondition condition = request.getCondition();
         AssetCriticality criticality = request.getCriticality();
+        Specialty specialty = request.getSpecialty();
 
         Room foundRoom = roomRepository
                 .findById(roomId)
                 .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find room with an ID of %d.", request.getRoomId())));
 
-        Asset asset = new Asset(foundRoom, name, brand, model, serialNumber, category, status, condition, criticality);
+        if (specialty == null)
+            specialty = specialtyFor(category);
+
+        Asset asset = new Asset(foundRoom, name, brand, model, serialNumber, category, status, condition, criticality, specialty);
 
         Asset savedAsset = assetRepository.save(asset);
 
@@ -121,6 +126,7 @@ public class AssetService {
         AssetStatus status = request.getStatus();
         AssetCondition condition = request.getCondition();
         AssetCriticality criticality = request.getCriticality();
+        Specialty specialty = request.getSpecialty();
 
         Asset asset = assetRepository
                 .findById(id)
@@ -156,6 +162,9 @@ public class AssetService {
 
         if (criticality != null)
             asset.setCriticality(criticality);
+
+        if (specialty != null)
+            asset.setSpecialty(specialty);
 
         Asset updatedAsset = assetRepository.save(asset);
 
@@ -194,7 +203,19 @@ public class AssetService {
                 asset.getStatus(),
                 asset.getCondition(),
                 asset.getCriticality(),
-                asset.getCreatedAt()
+                asset.getCreatedAt(),
+                asset.getSpecialty()
         );
+    }
+
+    private Specialty specialtyFor(AssetCategory category) {
+        return switch (category) {
+            case COMPUTER, NETWORK_EQUIPMENT -> Specialty.NETWORK_IT;
+            case PROJECTOR, LAB_EQUIPMENT, OFFICE_EQUIPMENT -> Specialty.EQUIPMENT;
+            case AIRCONDITIONER -> Specialty.HVAC;
+            case FURNITURE -> Specialty.FURNITURE;
+            case ELECTRICAL_EQUIPMENT -> Specialty.ELECTRICAL;
+            case OTHER -> Specialty.GENERAL;
+        };
     }
 }

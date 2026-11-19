@@ -139,7 +139,8 @@ public class NfcTagService {
             nfcTag.getAsset().getStatus(),
             nfcTag.getAsset().getCondition(),
             nfcTag.getAsset().getCriticality(),
-            nfcTag.getAsset().getCreatedAt()
+              nfcTag.getAsset().getCreatedAt(),
+            nfcTag.getAsset().getSpecialty()
     );
 
     return new NfcTagResponseDto(

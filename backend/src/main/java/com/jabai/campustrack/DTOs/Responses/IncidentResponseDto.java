@@ -11,6 +11,7 @@ public class IncidentResponseDto {
   private UserProfileResponseDto assigned;
   private Long assetId;
   private Long assignedToId;
+  private LocalDateTime assignedAt;
 
   private final RoomResponseDto room;
   private final UserProfileResponseDto reportedBy;
@@ -123,10 +124,12 @@ public class IncidentResponseDto {
   public IncidentPriority getPriority() { return priority; }
   public Long getAssetId() { return assetId; }
   public Long getAssignedToId() { return assignedToId; }
+  public LocalDateTime getAssignedAt() { return assignedAt; }
 
   // Setters
   public void setAsset(AssetResponseDto assetResponseDto) { this.asset = assetResponseDto; }
   public void setAssigned(UserProfileResponseDto userProfileResponseDto) { this.assigned = userProfileResponseDto; }
   public void setAssetId(Long assetId) { this.assetId = assetId; }
   public void setAssignedToId(Long assignedToId) { this.assignedToId = assignedToId; }
+  public void setAssignedAt(LocalDateTime assignedAt) { this.assignedAt = assignedAt; }
 }
