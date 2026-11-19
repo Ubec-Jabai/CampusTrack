@@ -2,8 +2,8 @@ import logging
 
 from django.core.files.uploadedfile import UploadedFile
 from django.http.request import HttpRequest
-from django.http.response import JsonResponse
-from django.views.decorators.http import require_POST
+from django.http.response import HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST, require_http_methods
 
 from incident_photo import services
 from incident_photo.schemas import IMAGE_FIELD_NAME, UploadIncidentPhotoResponse
@@ -25,3 +25,16 @@ def upload_incident_photo(request: HttpRequest) -> JsonResponse:
   except Exception:
     logger.exception("Incident photo upload failed")
     return JsonResponse({ "message": "Something went wrong while uploading your photo." }, status=500)
+
+
+@require_http_methods(["DELETE"])
+def delete_incident_photo(request: HttpRequest, filename: str) -> HttpResponse:
+  try:
+    services.delete_incident_photo(filename)
+  except ValueError:
+    return JsonResponse({ "message": "Invalid incident photo filename." }, status=400)
+  except Exception:
+    logger.exception("Incident photo deletion failed")
+    return JsonResponse({ "message": "Something went wrong while deleting your photo." }, status=500)
+
+  return HttpResponse(status=204)

@@ -1,3 +1,4 @@
+import re
 import time
 import uuid
 
@@ -9,6 +10,7 @@ from incident_photo.schemas import IMAGE_EXTENSIONS
 
 _SUPABASE = get_supabase_client()
 _BUCKET_NAME: str = "incident_pictures"
+_FILENAME_PATTERN = re.compile(r"^\d+-[0-9a-f]{8}\.(jpg|png|webp)$")
 
 
 def upload_incident_photo(image: UploadedFile) -> tuple[str, str]:
@@ -28,3 +30,10 @@ def upload_incident_photo(image: UploadedFile) -> tuple[str, str]:
     link = _SUPABASE.storage.from_(_BUCKET_NAME).get_public_url(filename)
 
     return filename, link
+
+
+def delete_incident_photo(filename: str) -> None:
+    if _FILENAME_PATTERN.fullmatch(filename) is None:
+        raise ValueError(f"Invalid incident photo filename: {filename}")
+
+    _SUPABASE.storage.from_(_BUCKET_NAME).remove([filename])
