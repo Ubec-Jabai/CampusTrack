@@ -14,14 +14,8 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { register } from "@/lib/api/api-auth";
+import { roleHome } from "@/lib/auth/role-home";
 import { useAuth } from "@/components/hooks/use-auth";
-import { UserRole } from "@/types/auth";
-
-const roleHome: Record<UserRole, string> = {
-  [UserRole.ADMIN]: "/admin",
-  [UserRole.WORKER]: "/worker",
-  [UserRole.STUDENT]: "/student",
-};
 
 export default function RegisterPage() {
   const router = useRouter();

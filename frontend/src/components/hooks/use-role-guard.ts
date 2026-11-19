@@ -3,13 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./use-auth";
+import { roleHome } from "@/lib/auth/role-home";
 import { UserRole } from "@/types/auth";
-
-const roleHome: Record<UserRole, string> = {
-  [UserRole.ADMIN]: "/admin",
-  [UserRole.WORKER]: "/worker",
-  [UserRole.STUDENT]: "/student",
-};
 
 export interface UseRoleGuardReturn {
   isAllowed: boolean;
