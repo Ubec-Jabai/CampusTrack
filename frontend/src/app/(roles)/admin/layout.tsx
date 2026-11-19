@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { RouterProvider } from "react-aria-components";
+import { AdminProfileProvider } from "@/components/admin/admin-profile-context";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { useRoleGuard } from "@/components/hooks";
 import { Separator } from "@/components/ui/separator";
@@ -14,7 +15,7 @@ import { UserRole } from "@/types/auth";
 
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   const router = useRouter();
-  const { isAllowed } = useRoleGuard(UserRole.ADMIN);
+  const { isAllowed, user } = useRoleGuard(UserRole.ADMIN);
 
   if (!isAllowed) {
     return (
@@ -26,17 +27,19 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
 
   return (
     <RouterProvider navigate={(href) => router.push(href)}>
-      <SidebarProvider>
-        <AdminSidebar />
-        <SidebarInset>
-          <header className="flex h-14 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="md:hidden" />
-            <Separator orientation="vertical" className="h-4" />
-            <p className="font-medium">Admin Panel</p>
-          </header>
-          <div className="flex-1 p-4 md:p-6">{children}</div>
-        </SidebarInset>
-      </SidebarProvider>
+      <AdminProfileProvider user={user}>
+        <SidebarProvider>
+          <AdminSidebar />
+          <SidebarInset>
+            <header className="flex h-14 items-center gap-2 border-b px-4">
+              <SidebarTrigger className="md:hidden" />
+              <Separator orientation="vertical" className="h-4" />
+              <p className="font-medium">Admin Panel</p>
+            </header>
+            <div className="flex-1 p-4 md:p-6">{children}</div>
+          </SidebarInset>
+        </SidebarProvider>
+      </AdminProfileProvider>
     </RouterProvider>
   );
 }

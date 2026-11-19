@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
+  { href: "/admin", label: "Home" },
   { href: "/admin/buildings", label: "Buildings" },
   { href: "/admin/rooms", label: "Rooms" },
   { href: "/admin/assets", label: "Assets" },
