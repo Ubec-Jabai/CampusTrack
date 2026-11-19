@@ -6,6 +6,8 @@ import com.jabai.campustrack.Models.User;
 import com.jabai.campustrack.Securities.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -28,9 +30,11 @@ public class IncidentPhotoService {
           @Value("${spring.application.microservices.incident-photo}") String incidentPhotoUrl,
           JwtUtil jwtUtil
   ) {
+    // Django runserver cannot parse chunked bodies; buffering forces a Content-Length header.
     this.restClient = RestClient
             .builder()
             .baseUrl(incidentPhotoUrl)
+            .requestFactory(new BufferingClientHttpRequestFactory(new JdkClientHttpRequestFactory()))
             .build();
     this.jwtUtil = jwtUtil;
   }
