@@ -40,7 +40,11 @@ function formatCreatedAt(value: string): string {
   });
 }
 
-function formatEnum(value: string): string {
+function formatEnum(value: string | null): string {
+  if (value === null) {
+    return "—";
+  }
+
   return value
     .toLowerCase()
     .split("_")

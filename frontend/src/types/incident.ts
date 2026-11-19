@@ -52,8 +52,8 @@ export interface IncidentResponseDto {
   description: string;
   safetyHazard: boolean;
   operationalImpact: boolean;
-  category: IncidentCategory;
-  priority: IncidentPriority;
+  category: IncidentCategory | null;
+  priority: IncidentPriority | null;
   status: IncidentStatus;
 }
 
