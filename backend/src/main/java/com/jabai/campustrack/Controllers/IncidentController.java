@@ -10,9 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <h1>IncidentController: JOHN LOUIE </h1>
@@ -31,9 +33,11 @@ public class IncidentController {
   // Create
   // admin can report for anyone, others can only report under their own account - CHRIS CHAN
   @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('WORKER', 'STUDENT') and #request.reportedById.toString() == authentication.name)")
-  @PostMapping
-  public ResponseEntity<IncidentResponseDto> createIncident(@Valid @RequestBody CreateIncidentRequestDto request) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(incidentService.createIncident(request));
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<IncidentResponseDto> createIncident(
+          @Valid @RequestPart("incident") CreateIncidentRequestDto request,
+          @RequestPart("image") MultipartFile image) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(incidentService.createIncident(request, image));
   }
 
   // Read all

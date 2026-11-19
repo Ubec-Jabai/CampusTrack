@@ -18,8 +18,14 @@ spring:
     cors:
       allowed-origins: http://localhost:3000
     microservices:
-      pdf-parser: http://localhost:8001/api/
+      pdf-parser: http://localhost:8001/api/pdf-parser/create/
+      incident-photo: http://localhost:8001/api/incident-photo/
       sample: https://jsonplaceholder.typicode.com/
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
 
   datasource:
     url: jdbc:mysql://localhost:3306/campus_tracker_database

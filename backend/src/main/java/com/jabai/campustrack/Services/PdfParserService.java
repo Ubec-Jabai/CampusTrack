@@ -19,15 +19,14 @@ import org.springframework.web.client.RestClientResponseException;
 @Service
 public class PdfParserService {
   private final RestClient restClient;
+  private final String pdfParserUrl;
   private final ObjectMapper objectMapper;
 
   public PdfParserService(
           @Value("${spring.application.microservices.pdf-parser}") String pdfParserUrl
   ) {
-    this.restClient = RestClient
-            .builder()
-            .baseUrl(pdfParserUrl)
-            .build();
+    this.restClient = RestClient.builder().build();
+    this.pdfParserUrl = pdfParserUrl;
     this.objectMapper = new ObjectMapper();
   }
 
@@ -42,7 +41,7 @@ public class PdfParserService {
 
     try {
       PdfParserResponseDto response = restClient.post()
-              .uri("pdf-parser/create/")
+              .uri(pdfParserUrl)
               .contentType(MediaType.APPLICATION_JSON)
               .accept(MediaType.APPLICATION_JSON)
               .header("Authorization", Authorization)

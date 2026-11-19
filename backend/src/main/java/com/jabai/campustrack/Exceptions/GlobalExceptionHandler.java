@@ -7,6 +7,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -34,6 +36,21 @@ public class GlobalExceptionHandler {
         Map<String, String> error = new HashMap<>();
         error.put("message", "Request body is missing or malformed");
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<Map<String, String>> handleMissingPart(MissingServletRequestPartException ex) {
+        Map<String, String> error = new HashMap<>();
+        String partName = ex.getRequestPartName();
+        error.put("message", "image".equals(partName) ? "Incident photo is required." : partName + " is required.");
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, String>> handleUploadTooLarge(MaxUploadSizeExceededException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", "Image must be 5 MB or smaller.");
+        return ResponseEntity.status(413).body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -68,6 +85,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PdfParserException.class)
     public ResponseEntity<Map<String,String>> pdfParser(PdfParserException ex) {
+        Map<String,String> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(ex.getStatus()).body(error);
+    }
+
+    @ExceptionHandler(IncidentPhotoException.class)
+    public ResponseEntity<Map<String,String>> incidentPhoto(IncidentPhotoException ex) {
         Map<String,String> error = new HashMap<>();
         error.put("message", ex.getMessage());
         return ResponseEntity.status(ex.getStatus()).body(error);

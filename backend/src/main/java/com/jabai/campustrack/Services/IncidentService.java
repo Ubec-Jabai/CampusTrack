@@ -23,12 +23,17 @@ import com.jabai.campustrack.Repositories.IncidentRepository;
 import com.jabai.campustrack.Repositories.RoomRepository;
 import com.jabai.campustrack.Repositories.Specifications.IncidentSpecifications;
 import com.jabai.campustrack.Repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,20 +43,24 @@ import java.util.Objects;
 @Service
 @Transactional
 public class IncidentService {
+    private static final Logger log = LoggerFactory.getLogger(IncidentService.class);
+
     private final IncidentRepository incidentRepository;
     private final RoomRepository roomRepository;
     private final AssetRepository assetRepository;
     private final UserRepository userRepository;
+    private final IncidentPhotoService incidentPhotoService;
 
-    public IncidentService(IncidentRepository incidents, RoomRepository rooms, AssetRepository assets, UserRepository users) {
+    public IncidentService(IncidentRepository incidents, RoomRepository rooms, AssetRepository assets, UserRepository users, IncidentPhotoService incidentPhotoService) {
         this.incidentRepository = incidents;
         this.roomRepository = rooms;
         this.assetRepository = assets;
         this.userRepository = users;
+        this.incidentPhotoService = incidentPhotoService;
     }
 
     // Create
-    public IncidentResponseDto createIncident(CreateIncidentRequestDto request) {
+    public IncidentResponseDto createIncident(CreateIncidentRequestDto request, MultipartFile image) {
         Long roomId = request.getRoomId();
         Long reportedById = request.getReportedById();
         IncidentCategory category = request.getCategory();
@@ -114,6 +123,11 @@ public class IncidentService {
             incident.setResolvedAt(resolvedAt);
         if (closedAt != null)
             incident.setClosedAt(closedAt);
+
+        // photo_path stores the Supabase filename returned by the microservice, not the local upload name.
+        String photoFilename = incidentPhotoService.uploadIncidentPhoto(image, foundReportedByUser);
+        incident.setPhotoPath(photoFilename);
+        deletePhotoOnRollback(photoFilename, foundReportedByUser);
 
         Incident response = incidentRepository.save(incident);
 
@@ -246,6 +260,24 @@ public class IncidentService {
     }
 
     // ===== Service Utils =====
+
+    // Supabase is outside the DB transaction, so a rolled-back insert must remove the uploaded file.
+    private void deletePhotoOnRollback(String filename, User uploadedBy) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) return;
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status != TransactionSynchronization.STATUS_ROLLED_BACK) return;
+
+                try {
+                    incidentPhotoService.deleteIncidentPhoto(filename, uploadedBy);
+                } catch (RuntimeException e) {
+                    log.error("Failed to delete incident photo {} after rollback", filename, e);
+                }
+            }
+        });
+    }
 
     private void autoAssignToWorker(Incident incident, Specialty specialty) {
         if (specialty == null) return;

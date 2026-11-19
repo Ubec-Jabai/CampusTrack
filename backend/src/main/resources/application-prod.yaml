@@ -22,7 +22,13 @@ spring:
       allowed-origins: ${CORS_ALLOWED_ORIGINS}
     microservices:
       pdf-parser: ${PDF_PARSER_URL}
+      incident-photo: ${INCIDENT_PHOTO_URL}
       sample: ${SAMPLE_SERVICE_URL:https://jsonplaceholder.typicode.com/}
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
 
   datasource:
     url: ${DB_URL}
