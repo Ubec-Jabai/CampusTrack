@@ -14,10 +14,6 @@ export default function AdminPage() {
     <div className="py-12 space-y-16">
 
       <section className="max-w-7xl mx-auto px-4">
-        <h1 className="text-2xl">Landing Page</h1>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-4">
         <Card className="max-w-xl mx-auto text-center">
           <CardHeader>
             <CardTitle>This Website Is Under Development</CardTitle>
