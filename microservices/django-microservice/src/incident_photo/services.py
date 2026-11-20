@@ -32,6 +32,13 @@ def upload_incident_photo(image: UploadedFile) -> tuple[str, str]:
     return filename, link
 
 
+def get_incident_photo_link(filename: str) -> str:
+    if _FILENAME_PATTERN.fullmatch(filename) is None:
+        raise ValueError(f"Invalid incident photo filename: {filename}")
+
+    return _SUPABASE.storage.from_(_BUCKET_NAME).get_public_url(filename)
+
+
 def delete_incident_photo(filename: str) -> None:
     if _FILENAME_PATTERN.fullmatch(filename) is None:
         raise ValueError(f"Invalid incident photo filename: {filename}")

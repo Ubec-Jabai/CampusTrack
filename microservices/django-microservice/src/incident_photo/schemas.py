@@ -14,6 +14,6 @@ ALLOWED_IMAGE_CONTENT_TYPES: frozenset[str] = frozenset(IMAGE_EXTENSIONS)
 MAX_IMAGE_BYTES: int = 5 * 1024 * 1024
 
 
-class UploadIncidentPhotoResponse(TypedDict):
+class IncidentPhotoResponse(TypedDict):
   filename: str
   link: str
