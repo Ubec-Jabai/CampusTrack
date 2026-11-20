@@ -15,6 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const navItems = [
@@ -29,10 +30,15 @@ const navItems = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   async function handleLogout() {
     await logout();
     router.replace("/login");
+  }
+
+  function handleNavigate() {
+    if (isMobile) setOpenMobile(false);
   }
 
   return (
@@ -54,6 +60,7 @@ export function AdminSidebar() {
                     href={item.href}
                     isActive={pathname === item.href}
                     tooltip={item.label}
+                    onPress={handleNavigate}
                   >
                     <span>{item.label}</span>
                   </SidebarMenuButton>
