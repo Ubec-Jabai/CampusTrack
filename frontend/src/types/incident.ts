@@ -56,6 +56,10 @@ export interface IncidentResponseDto {
   category: IncidentCategory | null;
   priority: IncidentPriority | null;
   status: IncidentStatus;
+  inspectedBy: UserProfileResponseDto | null;
+  inspectedAt: string | null;
+  approvedAt: string | null;
+  rejectionReason: string | null;
 }
 
 export interface IncidentPhotoResponseDto {
@@ -95,6 +99,7 @@ export interface UpdateIncidentRequestDto {
   evaluatedAt?: string;
   resolvedAt?: string;
   closedAt?: string;
+  rejectionReason?: string;
 }
 
 export interface SearchIncidentParams {
