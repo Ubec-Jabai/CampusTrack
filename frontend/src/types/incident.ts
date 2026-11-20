@@ -67,7 +67,6 @@ export interface CreateIncidentRequestDto {
   roomId: number;
   reportedById: number;
   category: IncidentCategory;
-  priority: IncidentPriority;
   status: IncidentStatus;
   incidentNumber: string;
   description: string;
@@ -88,7 +87,6 @@ export interface UpdateIncidentRequestDto {
   assignedToId?: number;
   category?: IncidentCategory;
   status?: IncidentStatus;
-  priority?: IncidentPriority;
   incidentNumber?: string;
   description?: string;
   safetyHazard?: boolean;

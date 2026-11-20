@@ -6,7 +6,6 @@ import { RoomSelect } from "@/components/admin/admin-room-select";
 import { UserSelect } from "@/components/admin/admin-user-select";
 import {
   INCIDENT_CATEGORY_OPTIONS,
-  INCIDENT_PRIORITY_OPTIONS,
   INCIDENT_STATUS_OPTIONS,
   isIncidentOptionValue,
 } from "@/components/admin/admin-incident-options";
@@ -33,7 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { createIncident, updateIncident } from "@/lib/api/api-incidents";
 import {
   IncidentCategory,
-  IncidentPriority,
   IncidentStatus,
   type IncidentResponseDto,
   type UpdateIncidentRequestDto,
@@ -75,9 +73,6 @@ export function IncidentFormDialog({
   const [category, setCategory] = useState<IncidentCategory | null>(
     incident?.category ?? null
   );
-  const [priority, setPriority] = useState<IncidentPriority | null>(
-    incident?.priority ?? null
-  );
   const [status, setStatus] = useState<IncidentStatus | null>(
     incident?.status ?? null
   );
@@ -114,7 +109,6 @@ export function IncidentFormDialog({
         incident?.reportedBy?.id ?? incident?.reportedById ?? null
       );
       setCategory(incident?.category ?? null);
-      setPriority(incident?.priority ?? null);
       setStatus(incident?.status ?? null);
       setIncidentNumber(incident?.incidentNumber ?? "");
       setDescription(incident?.description ?? "");
@@ -141,11 +135,6 @@ export function IncidentFormDialog({
 
     if (!category) {
       setError("Category is required.");
-      return;
-    }
-
-    if (!priority) {
-      setError("Priority is required.");
       return;
     }
 
@@ -200,7 +189,6 @@ export function IncidentFormDialog({
           roomId,
           reportedById,
           category,
-          priority,
           status,
           description: trimmedDescription,
           safetyHazard,
@@ -226,7 +214,6 @@ export function IncidentFormDialog({
             roomId,
             reportedById,
             category,
-            priority,
             status,
             incidentNumber: trimmedIncidentNumber,
             description: trimmedDescription,
@@ -307,33 +294,6 @@ export function IncidentFormDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {INCIDENT_CATEGORY_OPTIONS.map((option) => (
-                    <SelectItem key={option.id} id={option.id}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel>Priority</FieldLabel>
-              <Select
-                className="w-full"
-                placeholder="Select a priority"
-                selectedKey={priority}
-                onSelectionChange={(key) => {
-                  if (
-                    typeof key === "string" &&
-                    isIncidentOptionValue(INCIDENT_PRIORITY_OPTIONS, key)
-                  ) {
-                    setPriority(key);
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {INCIDENT_PRIORITY_OPTIONS.map((option) => (
                     <SelectItem key={option.id} id={option.id}>
                       {option.label}
                     </SelectItem>
