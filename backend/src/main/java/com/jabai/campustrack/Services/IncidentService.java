@@ -4,6 +4,7 @@ import com.jabai.campustrack.DTOs.Requests.CreateIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Requests.SearchIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Requests.UpdateIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Responses.AssetResponseDto;
+import com.jabai.campustrack.DTOs.Responses.IncidentPhotoResponseDto;
 import com.jabai.campustrack.DTOs.Responses.IncidentResponseDto;
 import com.jabai.campustrack.DTOs.Responses.RoomResponseDto;
 import com.jabai.campustrack.DTOs.Responses.UserProfileResponseDto;
@@ -174,6 +175,23 @@ public class IncidentService {
                 .findById(id)
                 .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the incident with an ID of %d.", id)));
         return buildIncidentResponseDto(response);
+    }
+
+    // Read photo link
+    public IncidentPhotoResponseDto getIncidentPhoto(Long id, Long requesterId) {
+        Incident incident = incidentRepository
+                .findById(id)
+                .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the incident with an ID of %d.", id)));
+
+        String photoPath = incident.getPhotoPath();
+        if (photoPath == null || photoPath.isBlank())
+            throw new RowNotFoundException(String.format("The incident with an ID of %d has no photo.", id));   
+
+        User requester = userRepository
+                .findById(requesterId)
+                .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", requesterId)));
+
+        return incidentPhotoService.getIncidentPhotoLink(photoPath, requester);
     }
 
     // Update
@@ -374,6 +392,7 @@ public class IncidentService {
             incidentResponseDto.setAssignedToId(assignedTo.getId());
         }
         incidentResponseDto.setAssignedAt(incident.getAssignedAt());
+        incidentResponseDto.setPhotoPath(incident.getPhotoPath());
 
         return incidentResponseDto;
     }

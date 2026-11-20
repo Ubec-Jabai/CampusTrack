@@ -25,6 +25,7 @@ public class IncidentResponseDto {
   private final LocalDateTime closedAt;
   private final String incidentNumber;
   private final String description;
+  private String photoPath;
   private final Boolean safetyHazard;
   private final Boolean operationalImpact;
   private final IncidentCategory category;
@@ -117,6 +118,7 @@ public class IncidentResponseDto {
   public LocalDateTime getClosedAt() { return closedAt; }
   public String getIncidentNumber() { return incidentNumber; }
   public String getDescription() { return description; }
+  public String getPhotoPath() { return photoPath; }
   public Boolean getSafetyHazard() { return safetyHazard; }
   public Boolean getOperationalImpact() { return operationalImpact; }
   public IncidentCategory getCategory() { return category; }
@@ -132,4 +134,5 @@ public class IncidentResponseDto {
   public void setAssetId(Long assetId) { this.assetId = assetId; }
   public void setAssignedToId(Long assignedToId) { this.assignedToId = assignedToId; }
   public void setAssignedAt(LocalDateTime assignedAt) { this.assignedAt = assignedAt; }
+  public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
 }

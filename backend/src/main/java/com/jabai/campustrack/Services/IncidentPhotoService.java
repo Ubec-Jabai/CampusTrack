@@ -68,6 +68,28 @@ public class IncidentPhotoService {
     }
   }
 
+  public IncidentPhotoResponseDto getIncidentPhotoLink(String filename, User requestedBy) {
+    try {
+      IncidentPhotoResponseDto response = restClient.get()
+              .uri("link/" + filename + "/")
+              .accept(MediaType.APPLICATION_JSON)
+              .header("Authorization", "Bearer " + jwtUtil.generateToken(requestedBy))
+              .retrieve()
+              .body(IncidentPhotoResponseDto.class);
+
+      if (response == null || response.getLink() == null || response.getLink().isBlank())
+        throw new IncidentPhotoException("Incident photo service returned an empty link", 502);
+
+      return response;
+    } catch (RestClientResponseException e) {
+      String message = e.getResponseBodyAsString();
+      if (message.isBlank()) { message = "Incident photo retrieval failed"; }
+      throw new IncidentPhotoException(message, e.getStatusCode().value());
+    } catch (RestClientException e) {
+      throw new IncidentPhotoException("Incident photo service unavailable", 503);
+    }
+  }
+
   public void deleteIncidentPhoto(String filename, User uploadedBy) {
     try {
       restClient.delete()

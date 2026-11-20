@@ -3,6 +3,7 @@ package com.jabai.campustrack.Controllers;
 import com.jabai.campustrack.DTOs.Requests.CreateIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Requests.SearchIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Requests.UpdateIncidentRequestDto;
+import com.jabai.campustrack.DTOs.Responses.IncidentPhotoResponseDto;
 import com.jabai.campustrack.DTOs.Responses.IncidentResponseDto;
 import com.jabai.campustrack.Services.IncidentService;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,6 +61,13 @@ public class IncidentController {
   @GetMapping("/{id}")
   public ResponseEntity<IncidentResponseDto> getIncident(@PathVariable Long id) {
     return ResponseEntity.ok(incidentService.getIncident(id));
+  }
+
+  // Read photo link
+  @PreAuthorize("hasAnyRole('ADMIN', 'WORKER', 'STUDENT')")
+  @GetMapping("/{id}/photo")
+  public ResponseEntity<IncidentPhotoResponseDto> getIncidentPhoto(Authentication authentication, @PathVariable Long id) {
+    return ResponseEntity.ok(incidentService.getIncidentPhoto(id, Long.parseLong(authentication.getName())));
   }
 
   // Update
