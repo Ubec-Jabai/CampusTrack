@@ -299,11 +299,20 @@ public class IncidentService {
     }
 
     // Delete
-    public void deleteIncident(Long id) {
-        Incident response = incidentRepository
+    public void deleteIncident(Long id, Long requesterId) {
+        Incident incident = incidentRepository
                 .findById(id)
                 .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the incident with an ID of %d.", id)));
-        incidentRepository.delete(response);
+
+        String photoPath = incident.getPhotoPath();
+        if (photoPath != null && !photoPath.isBlank()) {
+            User requester = userRepository
+                    .findById(requesterId)
+                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", requesterId)));
+            incidentPhotoService.deleteIncidentPhoto(photoPath, requester);
+        }
+
+        incidentRepository.delete(incident);
     }
 
     // ===== Service Utils =====

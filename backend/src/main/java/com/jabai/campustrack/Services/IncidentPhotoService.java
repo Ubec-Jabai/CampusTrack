@@ -93,7 +93,7 @@ public class IncidentPhotoService {
   public void deleteIncidentPhoto(String filename, User uploadedBy) {
     try {
       restClient.delete()
-              .uri(filename)
+              .uri(filename + "/")
               .header("Authorization", "Bearer " + jwtUtil.generateToken(uploadedBy))
               .retrieve()
               .toBodilessEntity();

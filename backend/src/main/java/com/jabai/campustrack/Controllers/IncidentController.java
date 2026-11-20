@@ -82,8 +82,8 @@ public class IncidentController {
   // admin or the owner of the incident only- CHRIS CHAN
   @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('WORKER', 'STUDENT') and @incidentService.isOwner(#id, authentication.name))")
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteIncident(@PathVariable Long id) {
-    incidentService.deleteIncident(id);
+  public ResponseEntity<Void> deleteIncident(Authentication authentication, @PathVariable Long id) {
+    incidentService.deleteIncident(id, Long.parseLong(authentication.getName()));
     return ResponseEntity.noContent().build();
   }
 }
