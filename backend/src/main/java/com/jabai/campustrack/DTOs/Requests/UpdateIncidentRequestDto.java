@@ -25,6 +25,9 @@ public class UpdateIncidentRequestDto {
   private final LocalDateTime resolvedAt;
   private final LocalDateTime closedAt;
 
+  @Size(max = 500, message = "Rejection reason must be 0 to 500 characters only.")
+  private final String rejectionReason;
+
   public UpdateIncidentRequestDto(
           Long roomId,
           Long reportedById,
@@ -39,7 +42,8 @@ public class UpdateIncidentRequestDto {
           Long assignedToId,
           LocalDateTime evaluatedAt,
           LocalDateTime resolvedAt,
-          LocalDateTime closedAt
+          LocalDateTime closedAt,
+          String rejectionReason
   ) {
     this.roomId = roomId;
     this.reportedById = reportedById;
@@ -55,6 +59,7 @@ public class UpdateIncidentRequestDto {
     this.evaluatedAt = evaluatedAt;
     this.resolvedAt = resolvedAt;
     this.closedAt = closedAt;
+    this.rejectionReason = rejectionReason;
   }
 
   // Getters
@@ -72,4 +77,5 @@ public class UpdateIncidentRequestDto {
   public LocalDateTime getEvaluatedAt() { return evaluatedAt; }
   public LocalDateTime getResolvedAt() { return resolvedAt; }
   public LocalDateTime getClosedAt() { return closedAt; }
+  public String getRejectionReason() { return rejectionReason; }
 }

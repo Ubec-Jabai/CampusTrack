@@ -32,6 +32,11 @@ public class IncidentResponseDto {
   private final IncidentPriority priority;
   private final IncidentStatus status;
 
+  private UserProfileResponseDto inspectedBy;
+  private LocalDateTime inspectedAt;
+  private LocalDateTime approvedAt;
+  private String rejectionReason;
+
   public IncidentResponseDto(
           Long id,
           LocalDateTime createdAt,
@@ -127,6 +132,10 @@ public class IncidentResponseDto {
   public Long getAssetId() { return assetId; }
   public Long getAssignedToId() { return assignedToId; }
   public LocalDateTime getAssignedAt() { return assignedAt; }
+  public UserProfileResponseDto getInspectedBy() { return inspectedBy; }
+  public LocalDateTime getInspectedAt() { return inspectedAt; }
+  public LocalDateTime getApprovedAt() { return approvedAt; }
+  public String getRejectionReason() { return rejectionReason; }
 
   // Setters
   public void setAsset(AssetResponseDto assetResponseDto) { this.asset = assetResponseDto; }
@@ -135,4 +144,8 @@ public class IncidentResponseDto {
   public void setAssignedToId(Long assignedToId) { this.assignedToId = assignedToId; }
   public void setAssignedAt(LocalDateTime assignedAt) { this.assignedAt = assignedAt; }
   public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
+  public void setInspectedBy(UserProfileResponseDto inspectedBy) { this.inspectedBy = inspectedBy; }
+  public void setInspectedAt(LocalDateTime inspectedAt) { this.inspectedAt = inspectedAt; }
+  public void setApprovedAt(LocalDateTime approvedAt) { this.approvedAt = approvedAt; }
+  public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
 }

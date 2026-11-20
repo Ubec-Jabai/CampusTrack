@@ -32,11 +32,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -219,7 +221,7 @@ public class IncidentService {
     }
 
     // Update
-    public IncidentResponseDto updateIncident(Long id, UpdateIncidentRequestDto request) {
+    public IncidentResponseDto updateIncident(Long id, UpdateIncidentRequestDto request, Long requesterId) {
         Incident foundIncident = incidentRepository
                 .findById(id)
                 .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the incident with an ID of %d.", id)));
@@ -266,7 +268,7 @@ public class IncidentService {
         if (category != null)
             foundIncident.setCategory(category);
         if (status != null)
-            foundIncident.setStatus(status);
+            applyStatusChange(foundIncident, status, request.getRejectionReason(), requesterId);
         if (incidentRepository.existsByIncidentNumber(incidentNumber))
             throw new DuplicatedRowException("Incident number already exists.");
         if (incidentNumber != null)
@@ -316,6 +318,28 @@ public class IncidentService {
     }
 
     // ===== Service Utils =====
+
+    private void applyStatusChange(Incident incident, IncidentStatus status, String rejectionReason, Long requesterId) {
+        if (status == IncidentStatus.REJECTED) {
+            if (rejectionReason == null || rejectionReason.isBlank())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rejection reason is required.");
+            incident.setRejectionReason(rejectionReason.trim());
+        } else {
+            incident.setRejectionReason(null);
+        }
+
+        if (status == IncidentStatus.PENDING_REVIEW) {
+            User requester = userRepository
+                    .findById(requesterId)
+                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", requesterId)));
+            incident.setInspectedBy(requester);
+            incident.setInspectedAt(LocalDateTime.now());
+        }
+        if (status == IncidentStatus.APPROVED)
+            incident.setApprovedAt(LocalDateTime.now());
+
+        incident.setStatus(status);
+    }
 
     // Supabase is outside the DB transaction, so a rolled-back insert must remove the uploaded file.
     private void deletePhotoOnRollback(String filename, User uploadedBy) {
@@ -427,6 +451,15 @@ public class IncidentService {
                 .orElse(false);
     }
 
+    @Transactional(readOnly = true)
+    public boolean isAssignedWorker(Long incidentId, String userId) {
+        return incidentRepository
+                .findById(incidentId)
+                .map(incident -> incident.getAssignedTo() != null
+                        && incident.getAssignedTo().getId().toString().equals(userId))
+                .orElse(false);
+    }
+
     private IncidentResponseDto buildIncidentResponseDto(Incident incident) {
         Room room = incident.getRoom();
         User reportedBy = incident.getReportedBy();
@@ -483,6 +516,11 @@ public class IncidentService {
         }
         incidentResponseDto.setAssignedAt(incident.getAssignedAt());
         incidentResponseDto.setPhotoPath(incident.getPhotoPath());
+        if (incident.getInspectedBy() != null)
+            incidentResponseDto.setInspectedBy(UserProfileResponseDto.from(incident.getInspectedBy()));
+        incidentResponseDto.setInspectedAt(incident.getInspectedAt());
+        incidentResponseDto.setApprovedAt(incident.getApprovedAt());
+        incidentResponseDto.setRejectionReason(incident.getRejectionReason());
 
         return incidentResponseDto;
     }

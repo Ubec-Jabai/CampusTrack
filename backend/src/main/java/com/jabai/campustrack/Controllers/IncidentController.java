@@ -71,11 +71,11 @@ public class IncidentController {
   }
 
   // Update
-  // admin or the owner of the incident only - CHRIS CHAN
-  @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('WORKER', 'STUDENT') and #request.assignedToId == null and @incidentService.isOwner(#id, authentication.name))")
+  // admin, the owner of the incident, or the worker assigned to it - CHRIS CHAN
+  @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('WORKER', 'STUDENT') and #request.assignedToId == null and (@incidentService.isOwner(#id, authentication.name) or @incidentService.isAssignedWorker(#id, authentication.name)))")
   @PatchMapping("/{id}")
-  public ResponseEntity<IncidentResponseDto> updateIncident(@PathVariable Long id, @Valid @RequestBody UpdateIncidentRequestDto request) {
-    return ResponseEntity.ok(incidentService.updateIncident(id, request));
+  public ResponseEntity<IncidentResponseDto> updateIncident(Authentication authentication, @PathVariable Long id, @Valid @RequestBody UpdateIncidentRequestDto request) {
+    return ResponseEntity.ok(incidentService.updateIncident(id, request, Long.parseLong(authentication.getName())));
   }
 
   // Delete
