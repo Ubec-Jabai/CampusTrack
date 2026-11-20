@@ -34,12 +34,17 @@ export function IncidentPhotoDialog({
   const [previewPortal, setPreviewPortal] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    // React Aria marks everything outside the modal inert. The top-layer
-    // attribute keeps the photo preview portal interactive.
     const container = document.createElement("div");
-    container.setAttribute("data-react-aria-top-layer", "");
-    document.body.appendChild(container);
-    setPreviewPortal(container);
+
+    function main() {
+      // React Aria marks everything outside the modal inert. The top-layer
+      // attribute keeps the photo preview portal interactive.
+      container.setAttribute("data-react-aria-top-layer", "");
+      document.body.appendChild(container);
+      setPreviewPortal(container);
+    }
+
+    main();
 
     return () => container.remove();
   }, []);
