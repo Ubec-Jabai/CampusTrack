@@ -2,6 +2,7 @@ import { apiClient, apiFetch } from "./api-client";
 import type { PageResponse } from "@/types/page";
 import type {
   CreateIncidentRequestDto,
+  IncidentPhotoResponseDto,
   IncidentResponseDto,
   SearchIncidentParams,
   UpdateIncidentRequestDto,
@@ -9,6 +10,7 @@ import type {
 
 export type {
   CreateIncidentRequestDto,
+  IncidentPhotoResponseDto,
   IncidentResponseDto,
   SearchIncidentParams,
   UpdateIncidentRequestDto,
@@ -49,6 +51,10 @@ export async function getIncidents(
 
 export async function getIncident(id: number): Promise<IncidentResponseDto> {
   return apiClient.get<IncidentResponseDto>(`/api/incidents/${id}`);
+}
+
+export async function getIncidentPhoto(id: number): Promise<IncidentPhotoResponseDto> {
+  return apiClient.get<IncidentPhotoResponseDto>(`/api/incidents/${id}/photo`);
 }
 
 export async function searchIncidents(
@@ -125,6 +131,7 @@ export async function deleteIncident(id: number): Promise<void> {
 export const incidentsApi = {
   getIncidents,
   getIncident,
+  getIncidentPhoto,
   searchIncidents,
   createIncident,
   updateIncident,

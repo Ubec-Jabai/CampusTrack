@@ -1,9 +1,10 @@
 "use client";
 
-import { PencilIcon, Trash2Icon } from "lucide-react";
+import { ImageIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { IncidentAssignDialog } from "@/components/admin/admin-incident-assign-dialog";
 import { IncidentDeleteDialog } from "@/components/admin/admin-incident-delete-dialog";
 import { IncidentFormDialog } from "@/components/admin/admin-incident-form-dialog";
+import { IncidentPhotoDialog } from "@/components/admin/admin-incident-photo-dialog";
 import { getUserDisplayName } from "@/components/admin/admin-user-select";
 import { Button, LinkButton } from "@/components/ui/button";
 import {
@@ -134,6 +135,20 @@ export function IncidentsTable({
                     </Button>
                   }
                 />
+                {incident.photoPath !== null && (
+                  <IncidentPhotoDialog
+                    incident={incident}
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`View photo for incident ${incident.incidentNumber}`}
+                      >
+                        <ImageIcon aria-hidden="true" />
+                      </Button>
+                    }
+                  />
+                )}
                 <IncidentFormDialog
                   incident={incident}
                   rooms={rooms}

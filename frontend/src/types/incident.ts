@@ -50,11 +50,17 @@ export interface IncidentResponseDto {
   assignedAt: string | null;
   incidentNumber: string;
   description: string;
+  photoPath: string | null;
   safetyHazard: boolean;
   operationalImpact: boolean;
   category: IncidentCategory | null;
   priority: IncidentPriority | null;
   status: IncidentStatus;
+}
+
+export interface IncidentPhotoResponseDto {
+  filename: string;
+  link: string;
 }
 
 export interface CreateIncidentRequestDto {
