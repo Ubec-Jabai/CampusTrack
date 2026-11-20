@@ -1,5 +1,7 @@
 "use client";
 
+import { ImageIcon } from "lucide-react";
+import { IncidentPhotoDialog } from "@/components/admin/admin-incident-photo-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -104,6 +106,20 @@ export function WorkerIncidentsTable({
             <TableCell>{formatCreatedAt(incident.createdAt)}</TableCell>
             <TableCell>
               <div className="flex justify-end gap-1">
+                {incident.photoPath !== null && (
+                  <IncidentPhotoDialog
+                    incident={incident}
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`View photo for incident ${incident.incidentNumber}`}
+                      >
+                        <ImageIcon aria-hidden="true" />
+                      </Button>
+                    }
+                  />
+                )}
                 <WorkerIncidentConfirmDialog
                   incident={incident}
                   nextStatus={IncidentStatus.PENDING_REVIEW}
