@@ -11,11 +11,13 @@ import com.jabai.campustrack.DTOs.Responses.UserProfileResponseDto;
 import com.jabai.campustrack.Exceptions.CustomExceptions.DuplicatedRowException;
 import com.jabai.campustrack.Exceptions.CustomExceptions.RowNotFoundException;
 import com.jabai.campustrack.Models.Asset;
+import com.jabai.campustrack.Models.Enums.AssetCriticality;
 import com.jabai.campustrack.Models.Enums.IncidentCategory;
 import com.jabai.campustrack.Models.Incident;
 import com.jabai.campustrack.Models.Room;
 import com.jabai.campustrack.Models.User;
 import com.jabai.campustrack.Models.Enums.IncidentPriority;
+import com.jabai.campustrack.Models.Enums.RoomCriticality;
 import com.jabai.campustrack.Models.Enums.IncidentStatus;
 import com.jabai.campustrack.Models.Enums.Specialty;
 import com.jabai.campustrack.Models.Enums.UserRole;
@@ -46,6 +48,22 @@ import java.util.Objects;
 public class IncidentService {
     private static final Logger log = LoggerFactory.getLogger(IncidentService.class);
 
+    private static final int SAFETY_HAZARD_POINTS = 3;
+    private static final int OPERATIONAL_IMPACT_POINTS = 2;
+    private static final int AREA_OVER_50_POINTS = 3;
+    private static final int AREA_21_TO_50_POINTS = 2;
+    private static final int AREA_6_TO_20_POINTS = 1;
+    private static final int CRITICALITY_LOW_POINTS = 0;
+    private static final int CRITICALITY_NORMAL_POINTS = 1;
+    private static final int CRITICALITY_HIGH_POINTS = 3;
+    private static final int CRITICALITY_CRITICAL_POINTS = 5;
+    private static final int AREA_OVER_50_THRESHOLD = 50;
+    private static final int AREA_OVER_20_THRESHOLD = 20;
+    private static final int AREA_OVER_5_THRESHOLD = 5;
+    private static final int LOW_PRIORITY_MAX_SCORE = 3;
+    private static final int MEDIUM_PRIORITY_MAX_SCORE = 7;
+    private static final int HIGH_PRIORITY_MAX_SCORE = 12;
+
     private final IncidentRepository incidentRepository;
     private final RoomRepository roomRepository;
     private final AssetRepository assetRepository;
@@ -65,7 +83,6 @@ public class IncidentService {
         Long roomId = request.getRoomId();
         Long reportedById = request.getReportedById();
         IncidentCategory category = request.getCategory();
-        IncidentPriority priority = request.getPriority();
         IncidentStatus status = request.getStatus();
         String incidentNumber = request.getIncidentNumber();
         String description = request.getDescription();
@@ -87,6 +104,19 @@ public class IncidentService {
                 .findById(reportedById)
                 .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", reportedById)));
 
+        if (incidentRepository.existsByIncidentNumber(incidentNumber))
+            throw new DuplicatedRowException("Incident number already exists.");
+
+        Asset foundAsset = null;
+        if (assetId != null) {
+            foundAsset = assetRepository
+                    .findById(assetId)
+                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the asset with an ID of %d.", assetId)));
+        }
+
+        IncidentPriority priority = calculatePriority(
+                category, safetyHazard, operationalImpact, affectedArea, foundRoom, foundAsset);
+
         Incident incident = new Incident(
                 foundRoom,
                 foundReportedByUser,
@@ -100,13 +130,7 @@ public class IncidentService {
                 status
         );
 
-        if (incidentRepository.existsByIncidentNumber(incidentNumber))
-            throw new DuplicatedRowException("Incident number already exists.");
-
-        if (assetId != null) {
-            Asset foundAsset = assetRepository
-                    .findById(assetId)
-                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the asset with an ID of %d.", assetId)));
+        if (foundAsset != null) {
             incident.setAsset(foundAsset);
 
             if (assignedToId == null && status == IncidentStatus.REPORTED)
@@ -206,7 +230,6 @@ public class IncidentService {
         Long assignedToId = request.getAssignedToId();
         IncidentCategory category = request.getCategory();
         IncidentStatus status = request.getStatus();
-        IncidentPriority priority = request.getPriority();
         String incidentNumber = request.getIncidentNumber();
         String description = request.getDescription();
         Boolean safetyHazard = request.getSafetyHazard();
@@ -244,8 +267,6 @@ public class IncidentService {
             foundIncident.setCategory(category);
         if (status != null)
             foundIncident.setStatus(status);
-        if (priority != null)
-            foundIncident.setPriority(priority);
         if (incidentRepository.existsByIncidentNumber(incidentNumber))
             throw new DuplicatedRowException("Incident number already exists.");
         if (incidentNumber != null)
@@ -264,6 +285,14 @@ public class IncidentService {
             foundIncident.setResolvedAt(resolvedAt);
         if (closedAt != null)
             foundIncident.setClosedAt(closedAt);
+
+        foundIncident.setPriority(calculatePriority(
+                foundIncident.getCategory(),
+                foundIncident.getSafetyHazard(),
+                foundIncident.getOperationalImpact(),
+                foundIncident.getAffectedArea(),
+                foundIncident.getRoom(),
+                foundIncident.getAsset()));
 
         Incident response = incidentRepository.save(foundIncident);
         return buildIncidentResponseDto(response);
@@ -295,6 +324,58 @@ public class IncidentService {
                 }
             }
         });
+    }
+
+    private IncidentPriority calculatePriority(IncidentCategory category, boolean safetyHazard,
+                                               boolean operationalImpact, int affectedArea,
+                                               Room room, Asset asset) {
+        // Hazard reports are critical by policy, regardless of the weighted score.
+        if (category == IncidentCategory.SAFETY_HAZARD && safetyHazard)
+            return IncidentPriority.CRITICAL;
+
+        int score = (safetyHazard ? SAFETY_HAZARD_POINTS : 0)
+                + (operationalImpact ? OPERATIONAL_IMPACT_POINTS : 0)
+                + areaPoints(affectedArea)
+                + criticalityPoints(room.getCriticality());
+
+        if (asset != null)
+            score += criticalityPoints(asset.getCriticality());
+
+        if (score <= LOW_PRIORITY_MAX_SCORE)
+            return IncidentPriority.LOW;
+        if (score <= MEDIUM_PRIORITY_MAX_SCORE)
+            return IncidentPriority.MEDIUM;
+        if (score <= HIGH_PRIORITY_MAX_SCORE)
+            return IncidentPriority.HIGH;
+        return IncidentPriority.CRITICAL;
+    }
+
+    private int areaPoints(int affectedArea) {
+        if (affectedArea > AREA_OVER_50_THRESHOLD)
+            return AREA_OVER_50_POINTS;
+        if (affectedArea > AREA_OVER_20_THRESHOLD)
+            return AREA_21_TO_50_POINTS;
+        if (affectedArea > AREA_OVER_5_THRESHOLD)
+            return AREA_6_TO_20_POINTS;
+        return 0;
+    }
+
+    private int criticalityPoints(AssetCriticality criticality) {
+        return switch (criticality) {
+            case LOW -> CRITICALITY_LOW_POINTS;
+            case NORMAL -> CRITICALITY_NORMAL_POINTS;
+            case HIGH -> CRITICALITY_HIGH_POINTS;
+            case CRITICAL -> CRITICALITY_CRITICAL_POINTS;
+        };
+    }
+
+    private int criticalityPoints(RoomCriticality criticality) {
+        return switch (criticality) {
+            case LOW -> CRITICALITY_LOW_POINTS;
+            case NORMAL -> CRITICALITY_NORMAL_POINTS;
+            case HIGH -> CRITICALITY_HIGH_POINTS;
+            case CRITICAL -> CRITICALITY_CRITICAL_POINTS;
+        };
     }
 
     private void autoAssignToWorker(Incident incident, Specialty specialty) {

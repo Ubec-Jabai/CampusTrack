@@ -1,7 +1,6 @@
 package com.jabai.campustrack.DTOs.Requests;
 
 import com.jabai.campustrack.Models.Enums.IncidentCategory;
-import com.jabai.campustrack.Models.Enums.IncidentPriority;
 import com.jabai.campustrack.Models.Enums.IncidentStatus;
 import jakarta.validation.constraints.Size;
 
@@ -14,7 +13,6 @@ public class UpdateIncidentRequestDto {
   private final Long assignedToId;
   private final IncidentCategory category;
   private final IncidentStatus status;
-  private final IncidentPriority priority;
 
   @Size(max = 50, message = "Incident number must be 0 to 50 characters only.")
   private final String incidentNumber;
@@ -32,7 +30,6 @@ public class UpdateIncidentRequestDto {
           Long reportedById,
           IncidentCategory category,
           String incidentNumber,
-          IncidentPriority priority,
           IncidentStatus status,
           String description,
           Boolean safetyHazard,
@@ -48,7 +45,6 @@ public class UpdateIncidentRequestDto {
     this.reportedById = reportedById;
     this.category = category;
     this.incidentNumber = incidentNumber;
-    this.priority = priority;
     this.status = status;
     this.description = description;
     this.safetyHazard = safetyHazard;
@@ -68,7 +64,6 @@ public class UpdateIncidentRequestDto {
   public Long getAssignedToId() { return assignedToId; }
   public IncidentCategory getCategory() { return category; }
   public String getIncidentNumber() { return incidentNumber; }
-  public IncidentPriority getPriority() { return priority; }
   public IncidentStatus getStatus() { return status; }
   public String getDescription() { return description; }
   public Boolean getSafetyHazard() { return safetyHazard; }

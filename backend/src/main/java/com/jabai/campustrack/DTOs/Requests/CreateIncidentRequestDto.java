@@ -1,7 +1,6 @@
 package com.jabai.campustrack.DTOs.Requests;
 
 import com.jabai.campustrack.Models.Enums.IncidentCategory;
-import com.jabai.campustrack.Models.Enums.IncidentPriority;
 import com.jabai.campustrack.Models.Enums.IncidentStatus;
 import jakarta.validation.constraints.*;
 
@@ -16,9 +15,6 @@ public class CreateIncidentRequestDto {
 
     @NotNull(message = "Category is required.")
     private final IncidentCategory category;
-
-    @NotNull(message = "Priority is required.")
-    private final IncidentPriority priority;
 
     @NotNull(message = "Incident status is required.")
     private final IncidentStatus status;
@@ -49,7 +45,6 @@ public class CreateIncidentRequestDto {
             Long roomId,
             Long reportedById,
             IncidentCategory category,
-            IncidentPriority priority,
             IncidentStatus status,
             String incidentNumber,
             String description,
@@ -65,7 +60,6 @@ public class CreateIncidentRequestDto {
         this.roomId = roomId;
         this.reportedById = reportedById;
         this.category = category;
-        this.priority = priority;
         this.status = status;
         this.incidentNumber = incidentNumber;
         this.description = description;
@@ -93,6 +87,5 @@ public class CreateIncidentRequestDto {
     public LocalDateTime getResolvedAt() { return resolvedAt; }
     public LocalDateTime getClosedAt() { return closedAt; }
     public String getIncidentNumber() { return incidentNumber; }
-    public IncidentPriority getPriority() { return priority; }
     public IncidentStatus getStatus() { return status; }
 }
