@@ -337,6 +337,8 @@ public class IncidentService {
         }
         if (status == IncidentStatus.APPROVED)
             incident.setApprovedAt(LocalDateTime.now());
+        if (status == IncidentStatus.RESOLVED)
+            incident.setResolvedAt(LocalDateTime.now());
 
         incident.setStatus(status);
     }
