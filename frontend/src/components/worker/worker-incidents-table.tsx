@@ -65,6 +65,10 @@ function canReject(status: IncidentStatus): boolean {
   return canInspect(status) || canApprove(status);
 }
 
+function canResolve(status: IncidentStatus): boolean {
+  return status === IncidentStatus.APPROVED;
+}
+
 export function WorkerIncidentsTable({
   incidents,
   onUpdated,
@@ -120,53 +124,62 @@ export function WorkerIncidentsTable({
                     }
                   />
                 )}
-                <WorkerIncidentConfirmDialog
-                  incident={incident}
-                  nextStatus={IncidentStatus.PENDING_REVIEW}
-                  title="Mark incident inspected"
-                  description={`Confirm that incident ${incident.incidentNumber} has been inspected. It will move to Pending review.`}
-                  actionLabel="Inspect"
-                  onUpdated={onUpdated}
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      isDisabled={!canInspect(incident.status)}
-                    >
-                      Inspect
-                    </Button>
-                  }
-                />
-                <WorkerIncidentConfirmDialog
-                  incident={incident}
-                  nextStatus={IncidentStatus.APPROVED}
-                  title="Approve incident"
-                  description={`Approve incident ${incident.incidentNumber}.`}
-                  actionLabel="Approve"
-                  onUpdated={onUpdated}
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      isDisabled={!canApprove(incident.status)}
-                    >
-                      Approve
-                    </Button>
-                  }
-                />
-                <WorkerIncidentRejectDialog
-                  incident={incident}
-                  onUpdated={onUpdated}
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      isDisabled={!canReject(incident.status)}
-                    >
-                      Reject
-                    </Button>
-                  }
-                />
+                {canInspect(incident.status) && (
+                  <WorkerIncidentConfirmDialog
+                    incident={incident}
+                    nextStatus={IncidentStatus.PENDING_REVIEW}
+                    title="Mark incident inspected"
+                    description={`Confirm that incident ${incident.incidentNumber} has been inspected. It will move to Pending review.`}
+                    actionLabel="Inspect"
+                    onUpdated={onUpdated}
+                    trigger={
+                      <Button variant="ghost" size="sm">
+                        Inspect
+                      </Button>
+                    }
+                  />
+                )}
+                {canApprove(incident.status) && (
+                  <WorkerIncidentConfirmDialog
+                    incident={incident}
+                    nextStatus={IncidentStatus.APPROVED}
+                    title="Approve incident"
+                    description={`Approve incident ${incident.incidentNumber}.`}
+                    actionLabel="Approve"
+                    onUpdated={onUpdated}
+                    trigger={
+                      <Button variant="ghost" size="sm">
+                        Approve
+                      </Button>
+                    }
+                  />
+                )}
+                {canResolve(incident.status) && (
+                  <WorkerIncidentConfirmDialog
+                    incident={incident}
+                    nextStatus={IncidentStatus.RESOLVED}
+                    title="Resolve incident"
+                    description={`Resolve incident ${incident.incidentNumber}.`}
+                    actionLabel="Resolve"
+                    onUpdated={onUpdated}
+                    trigger={
+                      <Button variant="ghost" size="sm">
+                        Resolve
+                      </Button>
+                    }
+                  />
+                )}
+                {canReject(incident.status) && (
+                  <WorkerIncidentRejectDialog
+                    incident={incident}
+                    onUpdated={onUpdated}
+                    trigger={
+                      <Button variant="ghost" size="sm">
+                        Reject
+                      </Button>
+                    }
+                  />
+                )}
               </div>
             </TableCell>
           </TableRow>

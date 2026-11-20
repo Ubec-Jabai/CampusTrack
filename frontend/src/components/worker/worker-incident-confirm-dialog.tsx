@@ -22,7 +22,10 @@ import {
 interface WorkerIncidentConfirmDialogProps {
   trigger: ReactNode;
   incident: IncidentResponseDto;
-  nextStatus: IncidentStatus.PENDING_REVIEW | IncidentStatus.APPROVED;
+  nextStatus:
+    | IncidentStatus.PENDING_REVIEW
+    | IncidentStatus.APPROVED
+    | IncidentStatus.RESOLVED;
   title: string;
   description: string;
   actionLabel: string;
