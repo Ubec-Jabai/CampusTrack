@@ -76,6 +76,7 @@ public class AssetService {
     public Page<AssetResponseDto> searchAssets(SearchAssetRequestDto request, Pageable pageable) {
         LocalDate fromDate = request.getFrom();
         LocalDate toDate = request.getTo();
+        Long id = request.getId();
         Long roomId = request.getRoomId();
         String name = request.getName();
         String brand = request.getBrand();
@@ -90,7 +91,8 @@ public class AssetService {
         LocalDateTime to = toDate != null ? toDate.atTime(LocalTime.MAX) : null;
 
         Specification<Asset> spec = Specification
-                .where(AssetSpecifications.hasRoomId(roomId))
+                .where(AssetSpecifications.hasId(id))
+                .and(AssetSpecifications.hasRoomId(roomId))
                 .and(AssetSpecifications.hasNameKeyword(name))
                 .and(AssetSpecifications.hasBrandKeyword(brand))
                 .and(AssetSpecifications.hasModelKeyword(model))

@@ -28,6 +28,7 @@ public class IncidentResponseDto {
   private String photoPath;
   private final Boolean safetyHazard;
   private final Boolean operationalImpact;
+  private final Integer affectedArea;
   private final IncidentCategory category;
   private final IncidentPriority priority;
   private final IncidentStatus status;
@@ -51,6 +52,7 @@ public class IncidentResponseDto {
           String description,
           Boolean safetyHazard,
           Boolean operationalImpact,
+          Integer affectedArea,
           IncidentCategory category,
           IncidentPriority priority,
           IncidentStatus status
@@ -69,6 +71,7 @@ public class IncidentResponseDto {
     this.description = description;
     this.safetyHazard = safetyHazard;
     this.operationalImpact = operationalImpact;
+    this.affectedArea = affectedArea;
     this.category = category;
     this.priority = priority;
     this.status = status;
@@ -88,6 +91,7 @@ public class IncidentResponseDto {
           String description,
           Boolean safetyHazard,
           Boolean operationalImpact,
+          Integer affectedArea,
           IncidentCategory category,
           IncidentPriority priority,
           IncidentStatus status
@@ -106,6 +110,7 @@ public class IncidentResponseDto {
     this.description = description;
     this.safetyHazard = safetyHazard;
     this.operationalImpact = operationalImpact;
+    this.affectedArea = affectedArea;
     this.category = category;
     this.priority = priority;
     this.status = status;
@@ -126,6 +131,7 @@ public class IncidentResponseDto {
   public String getPhotoPath() { return photoPath; }
   public Boolean getSafetyHazard() { return safetyHazard; }
   public Boolean getOperationalImpact() { return operationalImpact; }
+  public Integer getAffectedArea() { return affectedArea; }
   public IncidentCategory getCategory() { return category; }
   public IncidentStatus getStatus() { return status; }
   public IncidentPriority getPriority() { return priority; }

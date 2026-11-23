@@ -168,6 +168,7 @@ public class MaintenanceRecordService {
                 incident.getDescription(),
                 incident.getSafetyHazard(),
                 incident.getOperationalImpact(),
+                incident.getAffectedArea(),
                 incident.getCategory(),
                 incident.getPriority(),
                 incident.getStatus()

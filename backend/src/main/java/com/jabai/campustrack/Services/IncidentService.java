@@ -532,15 +532,29 @@ public class IncidentService {
                 incident.getDescription(),
                 incident.getSafetyHazard(),
                 incident.getOperationalImpact(),
+                incident.getAffectedArea(),
                 incident.getCategory(),
                 incident.getPriority(),
                 incident.getStatus()
         );
 
-        if (asset != null)
+        if (asset != null) {
+            Room assetRoom = asset.getRoom();
             incidentResponseDto.setAsset(new AssetResponseDto(
                     asset.getId(),
-                    asset.getRoom().getId(),
+                    new RoomResponseDto(
+                            assetRoom.getId(),
+                            assetRoom.getCreatedAt(),
+                            new BuildingResponseDto(
+                                    assetRoom.getBuilding().getId(),
+                                    assetRoom.getBuilding().getName(),
+                                    assetRoom.getBuilding().getCreatedAt()
+                            ),
+                            assetRoom.getRoomNumber(),
+                            assetRoom.getCapacity(),
+                            assetRoom.getRoomType(),
+                            assetRoom.getCriticality()
+                    ),
                     asset.getName(),
                     asset.getBrand(),
                     asset.getModel(),
@@ -552,6 +566,7 @@ public class IncidentService {
                     asset.getCreatedAt(),
                     asset.getSpecialty()
             ));
+        }
         if (assignedTo != null) {
             incidentResponseDto.setAssigned(UserProfileResponseDto.from(assignedTo));
             incidentResponseDto.setAssignedToId(assignedTo.getId());

@@ -10,6 +10,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 
 public class SearchAssetRequestDto {
+    @Positive
+    private final Long id;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private final LocalDate from;
 
@@ -29,6 +32,7 @@ public class SearchAssetRequestDto {
     private final AssetCriticality criticality;
 
     public SearchAssetRequestDto(
+            Long id,
             Long roomId,
             String name,
             String brand,
@@ -41,6 +45,7 @@ public class SearchAssetRequestDto {
             LocalDate from,
             LocalDate to
     ) {
+        this.id = id;
         this.roomId = roomId;
         this.name = name;
         this.brand = brand;
@@ -55,6 +60,7 @@ public class SearchAssetRequestDto {
     }
 
     // Getters
+    public Long getId() { return id; }
     public Long getRoomId() { return roomId; }
     public String getName() { return name; }
     public String getBrand() { return brand; }
