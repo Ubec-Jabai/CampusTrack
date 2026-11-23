@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { WorkerIncidentConfirmDialog } from "@/components/worker/worker-incident-confirm-dialog";
+import { WorkerIncidentDetailsDialog } from "@/components/worker/worker-incident-details-dialog";
 import { WorkerIncidentRejectDialog } from "@/components/worker/worker-incident-reject-dialog";
 import {
   IncidentStatus,
@@ -124,6 +125,14 @@ export function WorkerIncidentsTable({
                     }
                   />
                 )}
+                <WorkerIncidentDetailsDialog
+                  incident={incident}
+                  trigger={
+                    <Button variant="ghost" size="sm">
+                      View
+                    </Button>
+                  }
+                />
                 {canInspect(incident.status) && (
                   <WorkerIncidentConfirmDialog
                     incident={incident}
