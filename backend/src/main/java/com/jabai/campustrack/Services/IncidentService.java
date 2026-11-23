@@ -4,6 +4,7 @@ import com.jabai.campustrack.DTOs.Requests.CreateIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Requests.SearchIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Requests.UpdateIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Responses.AssetResponseDto;
+import com.jabai.campustrack.DTOs.Responses.BuildingResponseDto;
 import com.jabai.campustrack.DTOs.Responses.IncidentPhotoResponseDto;
 import com.jabai.campustrack.DTOs.Responses.IncidentResponseDto;
 import com.jabai.campustrack.DTOs.Responses.RoomResponseDto;
@@ -506,7 +507,11 @@ public class IncidentService {
         RoomResponseDto roomResponseDto = new RoomResponseDto(
                 room.getId(),
                 room.getCreatedAt(),
-                room.getBuilding().getId(),
+                new BuildingResponseDto(
+                        room.getBuilding().getId(),
+                        room.getBuilding().getName(),
+                        room.getBuilding().getCreatedAt()
+                ),
                 room.getRoomNumber(),
                 room.getCapacity(),
                 room.getRoomType(),
