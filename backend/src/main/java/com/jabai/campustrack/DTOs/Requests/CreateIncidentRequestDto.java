@@ -35,7 +35,9 @@ public class CreateIncidentRequestDto {
     @NotNull(message = "Affected area is required.")
     private final Integer affectedArea;
 
+    @NotNull(message = "Asset ID is required.")
     private final Long assetId;
+
     private final Long assignedToId;
     private final LocalDateTime evaluatedAt;
     private final LocalDateTime resolvedAt;
