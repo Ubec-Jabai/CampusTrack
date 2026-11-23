@@ -1,6 +1,8 @@
 package com.jabai.campustrack.Services;
 
 import com.jabai.campustrack.DTOs.Responses.StatisticsResponseDto;
+import com.jabai.campustrack.DTOs.Responses.WorkerStatisticsResponseDto;
+import com.jabai.campustrack.Models.Enums.IncidentStatus;
 import com.jabai.campustrack.Repositories.AssetRepository;
 import com.jabai.campustrack.Repositories.BuildingRepository;
 import com.jabai.campustrack.Repositories.IncidentRepository;
@@ -9,8 +11,17 @@ import com.jabai.campustrack.Repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class StatisticsService {
+    private static final List<IncidentStatus> INSPECTION_STATUSES = List.of(
+            IncidentStatus.REPORTED,
+            IncidentStatus.ASSIGNED,
+            IncidentStatus.INSPECTING,
+            IncidentStatus.IN_PROGRESS
+    );
+
     private final BuildingRepository buildingRepository;
     private final RoomRepository roomRepository;
     private final AssetRepository assetRepository;
@@ -32,13 +43,25 @@ public class StatisticsService {
     }
 
     @Transactional(readOnly = true)
-    public StatisticsResponseDto getStatistics() {
+    public StatisticsResponseDto getAdminStatistics() {
         return new StatisticsResponseDto(
                 buildingRepository.count(),
                 roomRepository.count(),
                 assetRepository.count(),
                 incidentRepository.count(),
                 userRepository.count()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public WorkerStatisticsResponseDto getWorkerStatistics(Long workerId) {
+        return new WorkerStatisticsResponseDto(
+                incidentRepository.countByAssignedToId(workerId),
+                incidentRepository.countByAssignedToIdAndStatusIn(workerId, INSPECTION_STATUSES),
+                incidentRepository.countByAssignedToIdAndStatus(workerId, IncidentStatus.PENDING_REVIEW),
+                incidentRepository.countByAssignedToIdAndStatus(workerId, IncidentStatus.APPROVED),
+                incidentRepository.countByAssignedToIdAndStatus(workerId, IncidentStatus.RESOLVED),
+                incidentRepository.countByAssignedToIdAndStatus(workerId, IncidentStatus.REJECTED)
         );
     }
 }
