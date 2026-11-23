@@ -5,3 +5,12 @@ export interface StatisticsResponseDto {
   incidents: number;
   users: number;
 }
+
+export interface WorkerStatisticsResponseDto {
+  assigned: number;
+  forInspection: number;
+  pendingReview: number;
+  approved: number;
+  resolved: number;
+  rejected: number;
+}

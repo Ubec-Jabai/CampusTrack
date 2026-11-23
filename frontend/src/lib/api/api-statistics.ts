@@ -1,14 +1,22 @@
 import { apiClient } from "./api-client";
-import type { StatisticsResponseDto } from "@/types/statistics";
+import type {
+  StatisticsResponseDto,
+  WorkerStatisticsResponseDto,
+} from "@/types/statistics";
 
-export type { StatisticsResponseDto };
+export type { StatisticsResponseDto, WorkerStatisticsResponseDto };
 
-export async function getStatistics(): Promise<StatisticsResponseDto> {
+export async function getAdminStatistics(): Promise<StatisticsResponseDto> {
   return apiClient.get<StatisticsResponseDto>("/api/statistics");
 }
 
+export async function getWorkerStatistics(): Promise<WorkerStatisticsResponseDto> {
+  return apiClient.get<WorkerStatisticsResponseDto>("/api/statistics/worker");
+}
+
 export const statisticsApi = {
-  getStatistics,
+  getAdminStatistics,
+  getWorkerStatistics,
 };
 
 export default statisticsApi;

@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getStatistics } from "@/lib/api/api-statistics";
+import { getAdminStatistics } from "@/lib/api/api-statistics";
 import type { ProfileDto } from "@/types/profile";
 import type { StatisticsResponseDto } from "@/types/statistics";
 
@@ -61,7 +61,7 @@ export function AdminDashboardPageClient() {
 
   const loadStatistics = useCallback(async () => {
     try {
-      setStatistics(await getStatistics());
+      setStatistics(await getAdminStatistics());
     } catch (cause: unknown) {
       setError(
         cause instanceof Error ? cause.message : "Failed to load statistics."
@@ -80,7 +80,7 @@ export function AdminDashboardPageClient() {
   useEffect(() => {
     let ignore = false;
 
-    getStatistics()
+    getAdminStatistics()
       .then((result) => {
         if (ignore) {
           return;
