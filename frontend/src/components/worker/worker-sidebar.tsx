@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { LogOutIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { logout } from "@/lib/api/api-auth";
+import { getUnreadCount } from "@/lib/api/api-notification";
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +14,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -21,12 +24,30 @@ import {
 const navItems = [
   { href: "/worker", label: "Home" },
   { href: "/worker/incidents", label: "Incidents" },
+  { href: "/worker/notifications", label: "Notifications" },
 ];
 
 export function WorkerSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile, setOpenMobile } = useSidebar();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let ignore = false;
+
+    getUnreadCount()
+      .then((result) => {
+        if (!ignore) {
+          setUnreadCount(result.unreadCount);
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      ignore = true;
+    };
+  }, [pathname]);
 
   async function handleLogout() {
     await logout();
@@ -60,6 +81,9 @@ export function WorkerSidebar() {
                   >
                     <span>{item.label}</span>
                   </SidebarMenuButton>
+                  {item.href === "/worker/notifications" && unreadCount > 0 && (
+                    <SidebarMenuBadge>{unreadCount}</SidebarMenuBadge>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
