@@ -71,7 +71,7 @@ export function WorkerNotificationsTable({
                 </span>
               ) : (
                 <Link
-                  href="/worker/incidents"
+                  href={`/worker/incidents?incidentId=${notification.incidentId}`}
                   className={
                     notification.readAt === null
                       ? "font-medium underline-offset-4 hover:underline"

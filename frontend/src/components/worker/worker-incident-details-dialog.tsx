@@ -21,8 +21,9 @@ import type { IncidentResponseDto } from "@/types/incident";
 import type { RoomResponseDto } from "@/types/room";
 
 interface WorkerIncidentDetailsDialogProps {
-  trigger: ReactNode;
+  trigger?: ReactNode;
   incident: IncidentResponseDto;
+  defaultOpen?: boolean;
 }
 
 function formatEnum(value: string | null): string {
@@ -79,11 +80,14 @@ function formatBoolean(value: boolean): string {
 export function WorkerIncidentDetailsDialog({
   trigger,
   incident,
+  defaultOpen = false,
 }: WorkerIncidentDetailsDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [imageLink, setImageLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(
+    defaultOpen && incident.photoPath !== null
+  );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewPortal, setPreviewPortal] = useState<HTMLElement | null>(null);
 
@@ -103,34 +107,43 @@ export function WorkerIncidentDetailsDialog({
     return () => container.remove();
   }, []);
 
-  function handleOpenChange(open: boolean): void {
-    setIsOpen(open);
-
-    if (!open) {
-      setIsPreviewOpen(false);
-      setImageLink(null);
-      setError(null);
+  useEffect(() => {
+    if (!isOpen || incident.photoPath === null) {
       return;
     }
 
-    setImageLink(null);
-    setError(null);
-
-    if (incident.photoPath === null) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
+    let ignore = false;
 
     getIncidentPhoto(incident.id)
-      .then((photo) => setImageLink(photo.link))
-      .catch((cause: unknown) =>
-        setError(
-          cause instanceof Error ? cause.message : "Failed to load the photo."
-        )
-      )
-      .finally(() => setIsLoading(false));
+      .then((photo) => {
+        if (!ignore) {
+          setImageLink(photo.link);
+        }
+      })
+      .catch((cause: unknown) => {
+        if (!ignore) {
+          setError(
+            cause instanceof Error ? cause.message : "Failed to load the photo."
+          );
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [isOpen, incident.id, incident.photoPath]);
+
+  function handleOpenChange(open: boolean): void {
+    setIsOpen(open);
+    setIsPreviewOpen(false);
+    setImageLink(null);
+    setError(null);
+    setIsLoading(open && incident.photoPath !== null);
   }
 
   return (

@@ -1,18 +1,36 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { WorkerIncidentDetailsDialog } from "@/components/worker/worker-incident-details-dialog";
 import { WorkerIncidentsTable } from "@/components/worker/worker-incidents-table";
 import { useAuth } from "@/components/hooks";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { searchIncidents } from "@/lib/api/api-incidents";
+import { getIncident, searchIncidents } from "@/lib/api/api-incidents";
 import type { IncidentResponseDto } from "@/types/incident";
 import type { PageMeta } from "@/types/page";
 
+function parseIncidentId(value: string | null): number | null {
+  if (value === null) {
+    return null;
+  }
+
+  const id = Number(value);
+
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
 export function WorkerIncidentsPageClient() {
   const { user, isLoading: isAuthLoading } = useAuth();
+  const initialIncidentId = parseIncidentId(
+    useSearchParams().get("incidentId")
+  );
   const [incidents, setIncidents] = useState<IncidentResponseDto[]>([]);
+  const [detailIncident, setDetailIncident] =
+    useState<IncidentResponseDto | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
   const [pageMeta, setPageMeta] = useState<PageMeta | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +75,32 @@ export function WorkerIncidentsPageClient() {
     void loadIncidents(1);
   }, [workerId, loadIncidents]);
 
+  useEffect(() => {
+    if (initialIncidentId === null) {
+      return;
+    }
+
+    let ignore = false;
+
+    getIncident(initialIncidentId)
+      .then((incident) => {
+        if (!ignore) {
+          setDetailIncident(incident);
+        }
+      })
+      .catch((cause: unknown) => {
+        if (!ignore) {
+          setDetailError(
+            cause instanceof Error ? cause.message : "Failed to load incident."
+          );
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [initialIncidentId]);
+
   const totalPages = pageMeta ? Math.max(pageMeta.totalPages, 1) : 1;
 
   if (isAuthLoading) {
@@ -86,6 +130,13 @@ export function WorkerIncidentsPageClient() {
           Inspect, approve, or reject incidents assigned to you.
         </p>
       </div>
+
+      {detailError && (
+        <Alert variant="destructive">
+          <AlertTitle>Unable to open incident</AlertTitle>
+          <AlertDescription>{detailError}</AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardContent>
@@ -146,6 +197,10 @@ export function WorkerIncidentsPageClient() {
           </CardFooter>
         )}
       </Card>
+
+      {detailIncident && (
+        <WorkerIncidentDetailsDialog incident={detailIncident} defaultOpen />
+      )}
     </div>
   );
 }
