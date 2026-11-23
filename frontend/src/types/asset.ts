@@ -74,6 +74,7 @@ export interface UpdateAssetRequestDto {
 }
 
 export interface SearchAssetParams {
+  id?: number;
   roomId?: number;
   name?: string;
   brand?: string;

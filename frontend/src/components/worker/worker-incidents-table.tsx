@@ -11,9 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { WorkerAssetDetailsDialog } from "@/components/worker/worker-asset-details-dialog";
 import { WorkerIncidentConfirmDialog } from "@/components/worker/worker-incident-confirm-dialog";
 import { WorkerIncidentDetailsDialog } from "@/components/worker/worker-incident-details-dialog";
 import { WorkerIncidentRejectDialog } from "@/components/worker/worker-incident-reject-dialog";
+import { WorkerRoomDetailsDialog } from "@/components/worker/worker-room-details-dialog";
 import {
   IncidentStatus,
   type IncidentResponseDto,
@@ -81,6 +83,7 @@ export function WorkerIncidentsTable({
           Incident
         </TableHead>
         <TableHead id="room">Room</TableHead>
+        <TableHead id="asset">Asset</TableHead>
         <TableHead id="category">Category</TableHead>
         <TableHead id="priority">Priority</TableHead>
         <TableHead id="status">Status</TableHead>
@@ -101,7 +104,42 @@ export function WorkerIncidentsTable({
         {(incident) => (
           <TableRow id={incident.id}>
             <TableCell>{incident.incidentNumber}</TableCell>
-            <TableCell>{incident.room ? incident.room.roomNumber : "—"}</TableCell>
+            <TableCell>
+              {incident.room ? (
+                <WorkerRoomDetailsDialog
+                  room={incident.room}
+                  trigger={
+                    <Button
+                      variant="link"
+                      className="h-auto justify-start p-0"
+                      aria-label={`View room ${incident.room.roomNumber}`}
+                    >
+                      {incident.room.roomNumber}
+                    </Button>
+                  }
+                />
+              ) : (
+                "—"
+              )}
+            </TableCell>
+            <TableCell>
+              {incident.asset ? (
+                <WorkerAssetDetailsDialog
+                  asset={incident.asset}
+                  trigger={
+                    <Button
+                      variant="link"
+                      className="h-auto justify-start p-0"
+                      aria-label={`View asset ${incident.asset.name}`}
+                    >
+                      {incident.asset.name}
+                    </Button>
+                  }
+                />
+              ) : (
+                "—"
+              )}
+            </TableCell>
             <TableCell>{formatEnum(incident.category)}</TableCell>
             <TableCell>{formatEnum(incident.priority)}</TableCell>
             <TableCell>{formatEnum(incident.status)}</TableCell>

@@ -234,6 +234,10 @@ export function WorkerIncidentDetailsDialog({
             <dd>{formatBoolean(incident.operationalImpact)}</dd>
           </div>
           <div className="flex flex-col gap-1">
+            <dt className="text-muted-foreground">Affected area</dt>
+            <dd>{incident.affectedArea > 0 ? incident.affectedArea : "—"}</dd>
+          </div>
+          <div className="flex flex-col gap-1">
             <dt className="text-muted-foreground">Created</dt>
             <dd>{formatDateTime(incident.createdAt)}</dd>
           </div>

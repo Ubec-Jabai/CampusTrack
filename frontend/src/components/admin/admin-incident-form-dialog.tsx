@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
+import { AssetSelect } from "@/components/admin/admin-asset-select";
 import { RoomSelect } from "@/components/admin/admin-room-select";
 import { UserSelect } from "@/components/admin/admin-user-select";
 import {
@@ -29,7 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { searchAssets } from "@/lib/api/api-assets";
 import { createIncident, updateIncident } from "@/lib/api/api-incidents";
+import type { AssetResponseDto } from "@/types/asset";
 import {
   IncidentCategory,
   IncidentStatus,
@@ -52,6 +55,23 @@ const YES_NO_OPTIONS = [
   { id: "no", label: "No" },
 ];
 
+async function loadAllAssetsForRoom(
+  roomId: number
+): Promise<AssetResponseDto[]> {
+  const assets: AssetResponseDto[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const result = await searchAssets({ roomId, page, size: 50 });
+    assets.push(...result.content);
+    totalPages = Math.max(result.page.totalPages, 1);
+    page += 1;
+  } while (page <= totalPages);
+
+  return assets;
+}
+
 export function IncidentFormDialog({
   trigger,
   rooms,
@@ -67,6 +87,11 @@ export function IncidentFormDialog({
   const [roomId, setRoomId] = useState<number | null>(
     incident?.room?.id ?? incident?.roomId ?? null
   );
+  const [assetId, setAssetId] = useState<number | null>(
+    incident?.asset?.id ?? incident?.assetId ?? null
+  );
+  const [roomAssets, setRoomAssets] = useState<AssetResponseDto[]>([]);
+  const [isLoadingAssets, setIsLoadingAssets] = useState(false);
   const [reportedById, setReportedById] = useState<number | null>(
     incident?.reportedBy?.id ?? incident?.reportedById ?? null
   );
@@ -105,6 +130,7 @@ export function IncidentFormDialog({
 
     if (open) {
       setRoomId(incident?.room?.id ?? incident?.roomId ?? null);
+      setAssetId(incident?.asset?.id ?? incident?.assetId ?? null);
       setReportedById(
         incident?.reportedBy?.id ?? incident?.reportedById ?? null
       );
@@ -120,11 +146,60 @@ export function IncidentFormDialog({
     }
   }
 
+  function handleRoomChange(newRoomId: number | null): void {
+    setRoomId(newRoomId);
+    setAssetId(null);
+  }
+
+  useEffect(() => {
+    let isMounted = false;
+
+    function main() {
+      if (!isOpen || roomId === null) {
+        setRoomAssets([]);
+        setIsLoadingAssets(false);
+        return;
+      }
+
+      isMounted = true;
+      setIsLoadingAssets(true);
+
+      loadAllAssetsForRoom(roomId)
+        .then((loaded) => {
+          if (isMounted) {
+            setRoomAssets(loaded);
+          }
+        })
+        .catch((cause: unknown) => {
+          if (isMounted) {
+            console.error("Failed to load assets for room:", cause);
+            setRoomAssets([]);
+          }
+        })
+        .finally(() => {
+          if (isMounted) {
+            setIsLoadingAssets(false);
+          }
+        });
+    }
+
+    main();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, roomId]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (roomId === null) {
       setError("Room is required.");
+      return;
+    }
+
+    if (assetId === null) {
+      setError("Asset is required.");
       return;
     }
 
@@ -187,6 +262,7 @@ export function IncidentFormDialog({
       if (incident) {
         const payload: UpdateIncidentRequestDto = {
           roomId,
+          assetId,
           reportedById,
           category,
           status,
@@ -212,6 +288,7 @@ export function IncidentFormDialog({
         await createIncident(
           {
             roomId,
+            assetId,
             reportedById,
             category,
             status,
@@ -259,9 +336,25 @@ export function IncidentFormDialog({
               <RoomSelect
                 rooms={rooms}
                 selectedRoomId={roomId}
-                onChange={setRoomId}
+                onChange={handleRoomChange}
                 placeholder="Select a room"
                 ariaLabel="Room"
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Asset</FieldLabel>
+              <AssetSelect
+                assets={roomAssets}
+                selectedAssetId={assetId}
+                onChange={setAssetId}
+                placeholder={
+                  roomId === null
+                    ? "Select a room first"
+                    : "Select an asset"
+                }
+                ariaLabel="Asset"
+                isDisabled={roomId === null}
+                isLoading={isLoadingAssets}
               />
             </Field>
             <Field>

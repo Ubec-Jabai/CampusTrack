@@ -68,6 +68,7 @@ export function IncidentsTable({
           Incident
         </TableHead>
         <TableHead id="room">Room</TableHead>
+        <TableHead id="asset">Asset</TableHead>
         <TableHead id="reportedBy">Reported by</TableHead>
         <TableHead id="assigned">Assigned</TableHead>
         <TableHead id="category">Category</TableHead>
@@ -99,6 +100,19 @@ export function IncidentsTable({
                   className="h-auto justify-start p-0"
                 >
                   {incident.room.roomNumber}
+                </LinkButton>
+              ) : (
+                "—"
+              )}
+            </TableCell>
+            <TableCell>
+              {incident.asset ? (
+                <LinkButton
+                  href={`/admin/assets?assetId=${incident.asset.id}`}
+                  variant="link"
+                  className="h-auto justify-start p-0"
+                >
+                  {incident.asset.name}
                 </LinkButton>
               ) : (
                 "—"

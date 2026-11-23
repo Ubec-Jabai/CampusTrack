@@ -13,6 +13,15 @@ import java.util.Locale;
 public class AssetSpecifications {
 
 
+    public static Specification<Asset> hasId(Long id) {
+        return (root, query, cb) -> {
+            if (id == null)
+                return null;
+            return cb.equal(root.get("id"), id);
+        };
+    }
+
+
     public static Specification<Asset> hasRoomId(Long roomId) {
         return (root, query, cb) -> {
             if (roomId == null)

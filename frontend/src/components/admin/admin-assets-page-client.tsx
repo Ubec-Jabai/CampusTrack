@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { AssetFormDialog } from "@/components/admin/admin-asset-form-dialog";
 import { AssetsTable } from "@/components/admin/admin-assets-table";
 import { RoomSelect } from "@/components/admin/admin-room-select";
@@ -36,6 +37,7 @@ import type { RoomResponseDto } from "@/types/room";
 import type { PageMeta } from "@/types/page";
 
 interface AssetFilters {
+  assetId: string;
   roomId: number | null;
   name: string;
   brand: string;
@@ -50,6 +52,7 @@ interface AssetFilters {
 }
 
 const EMPTY_FILTERS: AssetFilters = {
+  assetId: "",
   roomId: null,
   name: "",
   brand: "",
@@ -65,6 +68,7 @@ const EMPTY_FILTERS: AssetFilters = {
 
 function hasActiveFilters(filters: AssetFilters): boolean {
   return (
+    filters.assetId !== "" ||
     filters.roomId !== null ||
     filters.name !== "" ||
     filters.brand !== "" ||
@@ -95,14 +99,20 @@ async function loadAllRooms(): Promise<RoomResponseDto[]> {
 }
 
 export function AssetsPageClient() {
+  const initialAssetId = useSearchParams().get("assetId") ?? "";
   const [assets, setAssets] = useState<AssetResponseDto[]>([]);
   const [rooms, setRooms] = useState<RoomResponseDto[]>([]);
   const [roomsError, setRoomsError] = useState<string | null>(null);
   const [pageMeta, setPageMeta] = useState<PageMeta | null>(null);
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<AssetFilters>(EMPTY_FILTERS);
-  const [appliedFilters, setAppliedFilters] =
-    useState<AssetFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<AssetFilters>({
+    ...EMPTY_FILTERS,
+    assetId: initialAssetId,
+  });
+  const [appliedFilters, setAppliedFilters] = useState<AssetFilters>({
+    ...EMPTY_FILTERS,
+    assetId: initialAssetId,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,6 +121,7 @@ export function AssetsPageClient() {
       try {
         const result = hasActiveFilters(activeFilters)
           ? await searchAssets({
+              id: activeFilters.assetId ? Number(activeFilters.assetId) : undefined,
               roomId: activeFilters.roomId ?? undefined,
               name: activeFilters.name || undefined,
               brand: activeFilters.brand || undefined,
@@ -144,7 +155,11 @@ export function AssetsPageClient() {
   useEffect(() => {
     let ignore = false;
 
-    getAssets({ page: 1 })
+    const initialRequest = initialAssetId
+      ? searchAssets({ id: Number(initialAssetId), page: 1 })
+      : getAssets({ page: 1 });
+
+    initialRequest
       .then((result) => {
         if (ignore) {
           return;
@@ -169,7 +184,7 @@ export function AssetsPageClient() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [initialAssetId]);
 
   useEffect(() => {
     let ignore = false;
@@ -258,6 +273,19 @@ export function AssetsPageClient() {
           className="flex flex-1 flex-col gap-3"
         >
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <Field>
+              <FieldLabel htmlFor="asset-filter-id">Asset ID</FieldLabel>
+              <Input
+                id="asset-filter-id"
+                name="assetId"
+                type="number"
+                min={1}
+                value={filters.assetId}
+                onChange={(event) =>
+                  setFilters({ ...filters, assetId: event.target.value })
+                }
+              />
+            </Field>
             <Field>
               <FieldLabel htmlFor="asset-filter-name">Name</FieldLabel>
               <Input

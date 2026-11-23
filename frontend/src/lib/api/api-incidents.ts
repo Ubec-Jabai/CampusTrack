@@ -101,7 +101,7 @@ export async function searchIncidents(
 }
 
 export async function createIncident(
-  data: CreateIncidentRequestDto,
+  data: CreateIncidentRequestDto & { assetId: number },
   image: File
 ): Promise<IncidentResponseDto> {
   const formData = new FormData();

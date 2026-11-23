@@ -53,6 +53,7 @@ export interface IncidentResponseDto {
   photoPath: string | null;
   safetyHazard: boolean;
   operationalImpact: boolean;
+  affectedArea: number;
   category: IncidentCategory | null;
   priority: IncidentPriority | null;
   status: IncidentStatus;

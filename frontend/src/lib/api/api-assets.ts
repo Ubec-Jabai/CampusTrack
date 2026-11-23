@@ -55,6 +55,7 @@ export async function searchAssets(
   params: SearchAssetParams & PageParams = {}
 ): Promise<PageResponse<AssetResponseDto>> {
   const {
+    id,
     roomId,
     name,
     brand,
@@ -71,6 +72,7 @@ export async function searchAssets(
   } = params;
   return apiClient.get<PageResponse<AssetResponseDto>>(
     `/api/assets/search${buildQuery({
+      id,
       roomId,
       name,
       brand,
