@@ -35,6 +35,7 @@ public class SecurityConfig {
             "/api/incident-status-histories/**",
             "/api/maintenance-records/**",
             "/api/nfc-tags/**",
+            "/api/notifications/**",
             "/api/rooms/**",
             "/api/worker-specialties/**",
             "/api/pdf-parser/**",

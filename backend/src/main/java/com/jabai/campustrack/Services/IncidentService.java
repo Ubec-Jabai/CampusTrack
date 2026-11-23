@@ -19,6 +19,7 @@ import com.jabai.campustrack.Models.User;
 import com.jabai.campustrack.Models.Enums.IncidentPriority;
 import com.jabai.campustrack.Models.Enums.RoomCriticality;
 import com.jabai.campustrack.Models.Enums.IncidentStatus;
+import com.jabai.campustrack.Models.Enums.NotificationType;
 import com.jabai.campustrack.Models.Enums.Specialty;
 import com.jabai.campustrack.Models.Enums.UserRole;
 import com.jabai.campustrack.Repositories.AssetRepository;
@@ -71,13 +72,15 @@ public class IncidentService {
     private final AssetRepository assetRepository;
     private final UserRepository userRepository;
     private final IncidentPhotoService incidentPhotoService;
+    private final NotificationService notificationService;
 
-    public IncidentService(IncidentRepository incidents, RoomRepository rooms, AssetRepository assets, UserRepository users, IncidentPhotoService incidentPhotoService) {
+    public IncidentService(IncidentRepository incidents, RoomRepository rooms, AssetRepository assets, UserRepository users, IncidentPhotoService incidentPhotoService, NotificationService notificationService) {
         this.incidentRepository = incidents;
         this.roomRepository = rooms;
         this.assetRepository = assets;
         this.userRepository = users;
         this.incidentPhotoService = incidentPhotoService;
+        this.notificationService = notificationService;
     }
 
     // Create
@@ -132,17 +135,18 @@ public class IncidentService {
                 status
         );
 
+        User assignedWorker = null;
         if (foundAsset != null) {
             incident.setAsset(foundAsset);
 
             if (assignedToId == null && status == IncidentStatus.REPORTED)
-                autoAssignToWorker(incident, foundAsset.getSpecialty());
+                assignedWorker = autoAssignToWorker(incident, foundAsset.getSpecialty());
         }
         if (assignedToId != null) {
             User foundAssignedToUser = userRepository
                     .findById(assignedToId)
                     .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", assignedToId)));
-            assignIncident(incident, foundAssignedToUser);
+            assignedWorker = assignIncident(incident, foundAssignedToUser);
         }
         if (evaluatedAt != null)
             incident.setEvaluatedAt(evaluatedAt);
@@ -157,6 +161,10 @@ public class IncidentService {
         deletePhotoOnRollback(photoFilename, foundReportedByUser);
 
         Incident response = incidentRepository.save(incident);
+
+        // The notification FK requires the incident row to exist first.
+        if (assignedWorker != null)
+            notifyAssignment(response, assignedWorker);
 
         return buildIncidentResponseDto(response);
     }
@@ -259,11 +267,12 @@ public class IncidentService {
                     .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the asset with an ID of %d.", assetId)));
             foundIncident.setAsset(asset);
         }
+        User assignedWorker = null;
         if (assignedToId != null) {
             User user = userRepository
                     .findById(assignedToId)
                     .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", assignedToId)));
-            assignIncident(foundIncident, user);
+            assignedWorker = assignIncident(foundIncident, user);
         }
         if (category != null)
             foundIncident.setCategory(category);
@@ -297,6 +306,10 @@ public class IncidentService {
                 foundIncident.getAsset()));
 
         Incident response = incidentRepository.save(foundIncident);
+
+        if (assignedWorker != null)
+            notifyAssignment(response, assignedWorker);
+
         return buildIncidentResponseDto(response);
     }
 
@@ -320,6 +333,8 @@ public class IncidentService {
     // ===== Service Utils =====
 
     private void applyStatusChange(Incident incident, IncidentStatus status, String rejectionReason, Long requesterId) {
+        IncidentStatus previousStatus = incident.getStatus();
+
         if (status == IncidentStatus.REJECTED) {
             if (rejectionReason == null || rejectionReason.isBlank())
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rejection reason is required.");
@@ -341,6 +356,24 @@ public class IncidentService {
             incident.setResolvedAt(LocalDateTime.now());
 
         incident.setStatus(status);
+
+        if (previousStatus == status) return;
+
+        switch (status) {
+            case APPROVED -> notificationService.notifyUser(
+                    incident.getReportedBy(), incident, NotificationType.INCIDENT_APPROVED,
+                    String.format("Incident %s has been approved.", incident.getIncidentNumber()));
+            case REJECTED -> notificationService.notifyUser(
+                    incident.getReportedBy(), incident, NotificationType.INCIDENT_REJECTED,
+                    String.format("Incident %s has been rejected. Reason: %s", incident.getIncidentNumber(), incident.getRejectionReason()));
+            default -> { }
+        }
+    }
+
+    private void notifyAssignment(Incident incident, User worker) {
+        notificationService.notifyUser(
+                worker, incident, NotificationType.INCIDENT_ASSIGNED,
+                String.format("You have been assigned to incident %s.", incident.getIncidentNumber()));
     }
 
     // Supabase is outside the DB transaction, so a rolled-back insert must remove the uploaded file.
@@ -413,22 +446,22 @@ public class IncidentService {
         };
     }
 
-    private void autoAssignToWorker(Incident incident, Specialty specialty) {
-        if (specialty == null) return;
+    private User autoAssignToWorker(Incident incident, Specialty specialty) {
+        if (specialty == null) return null;
 
         List<User> candidates = userRepository.findAvailableWorkersBySpecialty(
                 specialty, UserRole.WORKER, PageRequest.of(0, 1));
-        if (candidates.isEmpty()) return;
+        if (candidates.isEmpty()) return null;
 
-        assignIncident(incident, candidates.getFirst());
+        return assignIncident(incident, candidates.getFirst());
     }
 
-    private void assignIncident(Incident incident, User worker) {
+    private User assignIncident(Incident incident, User worker) {
         boolean changed = incident.getAssignedTo() == null
                 || !Objects.equals(incident.getAssignedTo().getId(), worker.getId());
 
         incident.setAssignedTo(worker);
-        if (!changed) return;
+        if (!changed) return null;
 
         LocalDateTime now = LocalDateTime.now();
         incident.setAssignedAt(now);
@@ -442,6 +475,8 @@ public class IncidentService {
         if (worker.getUserRole() == UserRole.WORKER && worker.getProfile() != null) {
             worker.getProfile().setLastAssignedAt(now);
         }
+
+        return worker;
     }
 
     // used by @PreAuthorize in the controller - CHRIS CHAN
