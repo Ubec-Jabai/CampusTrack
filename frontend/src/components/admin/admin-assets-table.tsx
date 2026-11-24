@@ -4,6 +4,7 @@ import { EyeIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { AssetDeleteDialog } from "@/components/admin/admin-asset-delete-dialog";
 import { AssetFormDialog } from "@/components/admin/admin-asset-form-dialog";
 import { AssetViewDialog } from "@/components/admin/admin-asset-view-dialog";
+import { IncidentFormDialog } from "@/components/admin/admin-incident-form-dialog";
 import { Button, LinkButton } from "@/components/ui/button";
 import {
   Table,
@@ -14,11 +15,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { AssetResponseDto } from "@/types/asset";
+import type { UserProfileResponseDto } from "@/types/profile";
 import type { RoomResponseDto } from "@/types/room";
 
 interface AssetsTableProps {
   assets: AssetResponseDto[];
   rooms: RoomResponseDto[];
+  users: UserProfileResponseDto[];
   onReload: () => void;
   onDeleted: () => void;
 }
@@ -47,6 +50,7 @@ function formatEnum(value: string): string {
 export function AssetsTable({
   assets,
   rooms,
+  users,
   onReload,
   onDeleted,
 }: AssetsTableProps) {
@@ -74,7 +78,25 @@ export function AssetsTable({
       >
         {(asset) => (
           <TableRow id={asset.id}>
-            <TableCell>{asset.name}</TableCell>
+            <TableCell>
+              <IncidentFormDialog
+                rooms={rooms}
+                users={users}
+                defaultRoomId={asset.room?.id ?? asset.roomId ?? null}
+                defaultAssetId={asset.id}
+                onSaved={onReload}
+                trigger={
+                  <Button
+                    variant="link"
+                    className="h-auto justify-start p-0"
+                    isDisabled={users.length === 0}
+                    aria-label={`Report incident for ${asset.name}`}
+                  >
+                    {asset.name}
+                  </Button>
+                }
+              />
+            </TableCell>
             <TableCell>
               {asset.room ? (
                 <LinkButton

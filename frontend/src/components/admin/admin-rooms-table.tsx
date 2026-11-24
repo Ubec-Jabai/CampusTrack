@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { BuildingResponseDto } from "@/types/building";
+import { RoomCriticality } from "@/types/room";
 import type { RoomResponseDto } from "@/types/room";
 
 interface RoomsTableProps {
@@ -43,6 +44,13 @@ function formatEnum(value: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+
+const criticalityRowClassName: Record<RoomCriticality, string> = {
+  [RoomCriticality.LOW]: "bg-green-100/50 text-neutral-900",
+  [RoomCriticality.NORMAL]: "bg-blue-100/50 text-neutral-900",
+  [RoomCriticality.HIGH]: "bg-amber-100/50 text-neutral-900",
+  [RoomCriticality.CRITICAL]: "bg-red-100/50 text-neutral-900",
+};
 
 export function RoomsTable({
   rooms,
@@ -74,7 +82,10 @@ export function RoomsTable({
         )}
       >
         {(room) => (
-          <TableRow id={room.id}>
+          <TableRow
+            id={room.id}
+            className={criticalityRowClassName[room.criticality]}
+          >
             <TableCell>
               <AssetFormDialog
                 rooms={rooms}

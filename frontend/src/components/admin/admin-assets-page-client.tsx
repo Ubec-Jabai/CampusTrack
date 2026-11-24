@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getUsers } from "@/lib/api/api-admin-users";
 import { getAssets, searchAssets } from "@/lib/api/api-assets";
 import { getRooms } from "@/lib/api/api-rooms";
 import {
@@ -35,6 +36,7 @@ import {
 } from "@/types/asset";
 import type { RoomResponseDto } from "@/types/room";
 import type { PageMeta } from "@/types/page";
+import type { UserProfileResponseDto } from "@/types/profile";
 
 interface AssetFilters {
   assetId: string;
@@ -98,11 +100,28 @@ async function loadAllRooms(): Promise<RoomResponseDto[]> {
   return rooms;
 }
 
+async function loadAllUsers(): Promise<UserProfileResponseDto[]> {
+  const users: UserProfileResponseDto[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const result = await getUsers({ page, size: 50 });
+    users.push(...result.content);
+    totalPages = Math.max(result.page.totalPages, 1);
+    page += 1;
+  } while (page <= totalPages);
+
+  return users;
+}
+
 export function AssetsPageClient() {
   const initialAssetId = useSearchParams().get("assetId") ?? "";
   const [assets, setAssets] = useState<AssetResponseDto[]>([]);
   const [rooms, setRooms] = useState<RoomResponseDto[]>([]);
+  const [users, setUsers] = useState<UserProfileResponseDto[]>([]);
   const [roomsError, setRoomsError] = useState<string | null>(null);
+  const [usersError, setUsersError] = useState<string | null>(null);
   const [pageMeta, setPageMeta] = useState<PageMeta | null>(null);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<AssetFilters>({
@@ -213,6 +232,33 @@ export function AssetsPageClient() {
     };
   }, []);
 
+  useEffect(() => {
+    let ignore = false;
+
+    loadAllUsers()
+      .then((result) => {
+        if (ignore) {
+          return;
+        }
+
+        setUsers(result);
+        setUsersError(null);
+      })
+      .catch((cause: unknown) => {
+        if (ignore) {
+          return;
+        }
+
+        setUsersError(
+          cause instanceof Error ? cause.message : "Failed to load users."
+        );
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   function refresh(targetPage: number, activeFilters: AssetFilters) {
     setIsLoading(true);
     setError(null);
@@ -263,6 +309,13 @@ export function AssetsPageClient() {
         <Alert variant="destructive">
           <AlertTitle>Unable to load rooms</AlertTitle>
           <AlertDescription>{roomsError}</AlertDescription>
+        </Alert>
+      )}
+
+      {usersError && (
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load users</AlertTitle>
+          <AlertDescription>{usersError}</AlertDescription>
         </Alert>
       )}
 
@@ -538,6 +591,7 @@ export function AssetsPageClient() {
             <AssetsTable
               assets={assets}
               rooms={rooms}
+              users={users}
               onReload={handleReload}
               onDeleted={handleDeleted}
             />

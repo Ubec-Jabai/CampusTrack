@@ -9,23 +9,67 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getBuildings } from "@/lib/api/api-buildings";
 import { getRooms, searchRooms } from "@/lib/api/api-rooms";
 import type { BuildingResponseDto } from "@/types/building";
-import type { RoomResponseDto } from "@/types/room";
+import {
+  RoomCriticality,
+  RoomType,
+  type RoomResponseDto,
+} from "@/types/room";
 import type { PageMeta } from "@/types/page";
 
 interface RoomFilters {
   roomNumber: string;
+  capacity: string;
+  roomType: RoomType | null;
+  criticality: RoomCriticality | null;
   from: string;
   to: string;
 }
 
 const EMPTY_FILTERS: RoomFilters = {
   roomNumber: "",
+  capacity: "",
+  roomType: null,
+  criticality: null,
   from: "",
   to: "",
 };
+
+const ROOM_TYPE_OPTIONS: { id: RoomType; label: string }[] = [
+  { id: RoomType.CLASSROOM, label: "Classroom" },
+  { id: RoomType.LABORATORY, label: "Laboratory" },
+  { id: RoomType.LECTURE_HALL, label: "Lecture hall" },
+  { id: RoomType.OFFICE, label: "Office" },
+  { id: RoomType.SERVER_ROOM, label: "Server room" },
+  { id: RoomType.STORAGE, label: "Storage" },
+  { id: RoomType.WORKSHOP, label: "Workshop" },
+  { id: RoomType.CONFERENCE_ROOM, label: "Conference room" },
+  { id: RoomType.RESTROOM, label: "Restroom" },
+  { id: RoomType.OTHER, label: "Other" },
+];
+
+const CRITICALITY_OPTIONS: { id: RoomCriticality; label: string }[] = [
+  { id: RoomCriticality.LOW, label: "Low" },
+  { id: RoomCriticality.NORMAL, label: "Normal" },
+  { id: RoomCriticality.HIGH, label: "High" },
+  { id: RoomCriticality.CRITICAL, label: "Critical" },
+];
+
+function isOptionValue<T extends string>(
+  options: { id: T; label: string }[],
+  value: string
+): value is T {
+  return options.some((option) => option.id === value);
+}
 
 export function RoomsPageClient() {
   const initialRoomNumber = useSearchParams().get("roomNumber") ?? "";
@@ -50,12 +94,21 @@ export function RoomsPageClient() {
       try {
         const hasFilters =
           activeFilters.roomNumber !== "" ||
+          activeFilters.capacity !== "" ||
+          activeFilters.roomType !== null ||
+          activeFilters.criticality !== null ||
           activeFilters.from !== "" ||
           activeFilters.to !== "";
 
         const result = hasFilters
           ? await searchRooms({
               roomNumber: activeFilters.roomNumber || undefined,
+              capacity:
+                activeFilters.capacity === ""
+                  ? undefined
+                  : Number(activeFilters.capacity),
+              roomType: activeFilters.roomType ?? undefined,
+              criticality: activeFilters.criticality ?? undefined,
               from: activeFilters.from || undefined,
               to: activeFilters.to || undefined,
               page: targetPage,
@@ -189,48 +242,121 @@ export function RoomsPageClient() {
         </Alert>
       )}
 
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <form
           onSubmit={handleSearch}
           noValidate
-          className="flex flex-col gap-3 sm:flex-row sm:items-end"
+          className="flex flex-1 flex-col gap-3"
         >
-          <Field className="sm:w-56">
-            <FieldLabel htmlFor="room-filter-number">Room number</FieldLabel>
-            <Input
-              id="room-filter-number"
-              name="roomNumber"
-              value={filters.roomNumber}
-              maxLength={50}
-              onChange={(event) =>
-                setFilters({ ...filters, roomNumber: event.target.value })
-              }
-            />
-          </Field>
-          <Field className="sm:w-44">
-            <FieldLabel htmlFor="room-filter-from">Created from</FieldLabel>
-            <Input
-              id="room-filter-from"
-              name="from"
-              type="date"
-              value={filters.from}
-              onChange={(event) =>
-                setFilters({ ...filters, from: event.target.value })
-              }
-            />
-          </Field>
-          <Field className="sm:w-44">
-            <FieldLabel htmlFor="room-filter-to">Created to</FieldLabel>
-            <Input
-              id="room-filter-to"
-              name="to"
-              type="date"
-              value={filters.to}
-              onChange={(event) =>
-                setFilters({ ...filters, to: event.target.value })
-              }
-            />
-          </Field>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <Field>
+              <FieldLabel htmlFor="room-filter-number">Room number</FieldLabel>
+              <Input
+                id="room-filter-number"
+                name="roomNumber"
+                value={filters.roomNumber}
+                maxLength={50}
+                onChange={(event) =>
+                  setFilters({ ...filters, roomNumber: event.target.value })
+                }
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="room-filter-capacity">Capacity</FieldLabel>
+              <Input
+                id="room-filter-capacity"
+                name="capacity"
+                type="number"
+                min={1}
+                value={filters.capacity}
+                onChange={(event) =>
+                  setFilters({ ...filters, capacity: event.target.value })
+                }
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Room type</FieldLabel>
+              <Select
+                className="w-full"
+                selectedKey={filters.roomType ?? 0}
+                onSelectionChange={(key) => {
+                  if (key === 0) {
+                    setFilters({ ...filters, roomType: null });
+                  } else if (
+                    typeof key === "string" &&
+                    isOptionValue(ROOM_TYPE_OPTIONS, key)
+                  ) {
+                    setFilters({ ...filters, roomType: key });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem id={0}>Any type</SelectItem>
+                  {ROOM_TYPE_OPTIONS.map((option) => (
+                    <SelectItem key={option.id} id={option.id}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <FieldLabel>Criticality</FieldLabel>
+              <Select
+                className="w-full"
+                selectedKey={filters.criticality ?? 0}
+                onSelectionChange={(key) => {
+                  if (key === 0) {
+                    setFilters({ ...filters, criticality: null });
+                  } else if (
+                    typeof key === "string" &&
+                    isOptionValue(CRITICALITY_OPTIONS, key)
+                  ) {
+                    setFilters({ ...filters, criticality: key });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem id={0}>Any criticality</SelectItem>
+                  {CRITICALITY_OPTIONS.map((option) => (
+                    <SelectItem key={option.id} id={option.id}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="room-filter-from">Created from</FieldLabel>
+              <Input
+                id="room-filter-from"
+                name="from"
+                type="date"
+                value={filters.from}
+                onChange={(event) =>
+                  setFilters({ ...filters, from: event.target.value })
+                }
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="room-filter-to">Created to</FieldLabel>
+              <Input
+                id="room-filter-to"
+                name="to"
+                type="date"
+                value={filters.to}
+                onChange={(event) =>
+                  setFilters({ ...filters, to: event.target.value })
+                }
+              />
+            </Field>
+          </div>
           <div className="flex gap-2">
             <Button type="submit" isDisabled={isLoading}>
               Search

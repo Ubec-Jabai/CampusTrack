@@ -60,6 +60,8 @@ interface IncidentFormDialogProps {
   rooms: RoomResponseDto[];
   users: UserProfileResponseDto[];
   incident?: IncidentResponseDto;
+  defaultRoomId?: number | null;
+  defaultAssetId?: number | null;
   onSaved: () => void;
 }
 
@@ -90,6 +92,8 @@ export function IncidentFormDialog({
   rooms,
   users,
   incident,
+  defaultRoomId,
+  defaultAssetId,
   onSaved,
 }: IncidentFormDialogProps) {
   const incidentNumberId = useId();
@@ -97,12 +101,15 @@ export function IncidentFormDialog({
   const affectedAreaId = useId();
   const photoId = useId();
   const [isOpen, setIsOpen] = useState(false);
-  const [roomId, setRoomId] = useState<number | null>(
-    incident?.room?.id ?? incident?.roomId ?? null
-  );
-  const [assetId, setAssetId] = useState<number | null>(
-    incident?.asset?.id ?? incident?.assetId ?? null
-  );
+  const isEditing = incident !== undefined;
+  const initialRoomId = incident
+    ? incident.room?.id ?? incident.roomId ?? null
+    : defaultRoomId ?? null;
+  const initialAssetId = incident
+    ? incident.asset?.id ?? incident.assetId ?? null
+    : defaultAssetId ?? null;
+  const [roomId, setRoomId] = useState<number | null>(initialRoomId);
+  const [assetId, setAssetId] = useState<number | null>(initialAssetId);
   const [roomAssets, setRoomAssets] = useState<AssetResponseDto[]>([]);
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
   const [reportedById, setReportedById] = useState<number | null>(
@@ -136,7 +143,6 @@ export function IncidentFormDialog({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isEditing = incident !== undefined;
   const submitLabel = isSubmitting
     ? "Saving..."
     : isEditing
@@ -148,8 +154,8 @@ export function IncidentFormDialog({
     stopCamera();
 
     if (open) {
-      setRoomId(incident?.room?.id ?? incident?.roomId ?? null);
-      setAssetId(incident?.asset?.id ?? incident?.assetId ?? null);
+      setRoomId(initialRoomId);
+      setAssetId(initialAssetId);
       setReportedById(
         incident?.reportedBy?.id ?? incident?.reportedById ?? null
       );
