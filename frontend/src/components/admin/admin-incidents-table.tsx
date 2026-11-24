@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { IncidentStatus } from "@/types/incident";
 import type { IncidentResponseDto } from "@/types/incident";
 import type { UserProfileResponseDto } from "@/types/profile";
 import type { RoomResponseDto } from "@/types/room";
@@ -53,6 +54,18 @@ function formatEnum(value: string | null): string {
     .join(" ");
 }
 
+const statusRowClassName: Record<IncidentStatus, string> = {
+  [IncidentStatus.REPORTED]: "bg-amber-100/50",
+  [IncidentStatus.INSPECTING]: "bg-yellow-100/50",
+  [IncidentStatus.PENDING_REVIEW]: "bg-violet-100/50",
+  [IncidentStatus.REJECTED]: "bg-red-100/50",
+  [IncidentStatus.DECLINED]: "bg-gray-100/50",
+  [IncidentStatus.APPROVED]: "bg-green-100/50",
+  [IncidentStatus.ASSIGNED]: "bg-indigo-100/50",
+  [IncidentStatus.IN_PROGRESS]: "bg-blue-100/50",
+  [IncidentStatus.RESOLVED]: "bg-emerald-100/50",
+};
+
 export function IncidentsTable({
   incidents,
   rooms,
@@ -88,7 +101,7 @@ export function IncidentsTable({
         )}
       >
         {(incident) => (
-          <TableRow id={incident.id}>
+          <TableRow id={incident.id} className={statusRowClassName[incident.status]}>
             <TableCell>{incident.incidentNumber}</TableCell>
             <TableCell>
               {incident.room ? (
