@@ -17,6 +17,7 @@ import { WorkerIncidentDetailsDialog } from "@/components/worker/worker-incident
 import { WorkerIncidentRejectDialog } from "@/components/worker/worker-incident-reject-dialog";
 import { WorkerRoomDetailsDialog } from "@/components/worker/worker-room-details-dialog";
 import {
+  IncidentPriority,
   IncidentStatus,
   type IncidentResponseDto,
 } from "@/types/incident";
@@ -72,6 +73,13 @@ function canResolve(status: IncidentStatus): boolean {
   return status === IncidentStatus.APPROVED;
 }
 
+const priorityRowClassName: Record<IncidentPriority, string> = {
+  [IncidentPriority.LOW]: "bg-green-100/50",
+  [IncidentPriority.MEDIUM]: "bg-blue-100/50",
+  [IncidentPriority.HIGH]: "bg-amber-100/50",
+  [IncidentPriority.CRITICAL]: "bg-red-100/50",
+};
+
 export function WorkerIncidentsTable({
   incidents,
   onUpdated,
@@ -102,7 +110,14 @@ export function WorkerIncidentsTable({
         )}
       >
         {(incident) => (
-          <TableRow id={incident.id}>
+          <TableRow
+            id={incident.id}
+            className={
+              incident.priority
+                ? priorityRowClassName[incident.priority]
+                : undefined
+            }
+          >
             <TableCell>{incident.incidentNumber}</TableCell>
             <TableCell>
               {incident.room ? (
