@@ -46,10 +46,10 @@ function formatEnum(value: string): string {
 }
 
 const criticalityRowClassName: Record<RoomCriticality, string> = {
-  [RoomCriticality.LOW]: "bg-green-100/50 text-neutral-900",
-  [RoomCriticality.NORMAL]: "bg-blue-100/50 text-neutral-900",
-  [RoomCriticality.HIGH]: "bg-amber-100/50 text-neutral-900",
-  [RoomCriticality.CRITICAL]: "bg-red-100/50 text-neutral-900",
+  [RoomCriticality.LOW]: "bg-green-100/50",
+  [RoomCriticality.NORMAL]: "bg-blue-100/50",
+  [RoomCriticality.HIGH]: "bg-amber-100/50",
+  [RoomCriticality.CRITICAL]: "bg-red-100/50",
 };
 
 export function RoomsTable({

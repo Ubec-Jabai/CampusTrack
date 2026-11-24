@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AssetStatus } from "@/types/asset";
 import type { AssetResponseDto } from "@/types/asset";
 import type { UserProfileResponseDto } from "@/types/profile";
 import type { RoomResponseDto } from "@/types/room";
@@ -47,6 +48,14 @@ function formatEnum(value: string): string {
     .join(" ");
 }
 
+const statusRowClassName: Record<AssetStatus, string> = {
+  [AssetStatus.IN_USE]: "bg-blue-100/50",
+  [AssetStatus.AVAILABLE]: "bg-green-100/50",
+  [AssetStatus.UNDER_MAINTENANCE]: "bg-amber-100/50",
+  [AssetStatus.OUT_OF_SERVICE]: "bg-red-100/50",
+  [AssetStatus.RETIRED]: "bg-gray-100/50",
+};
+
 export function AssetsTable({
   assets,
   rooms,
@@ -77,7 +86,7 @@ export function AssetsTable({
         )}
       >
         {(asset) => (
-          <TableRow id={asset.id}>
+          <TableRow id={asset.id} className={statusRowClassName[asset.status]}>
             <TableCell>
               <IncidentFormDialog
                 rooms={rooms}
