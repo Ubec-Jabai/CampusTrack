@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
 import { AssetSelect } from "@/components/admin/admin-asset-select";
 import { RoomSelect } from "@/components/admin/admin-room-select";
@@ -20,7 +27,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -115,6 +128,11 @@ export function IncidentFormDialog({
   );
   const [affectedArea, setAffectedArea] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isCameraStarting, setIsCameraStarting] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -127,6 +145,7 @@ export function IncidentFormDialog({
 
   function handleOpenChange(open: boolean): void {
     setIsOpen(open);
+    stopCamera();
 
     if (open) {
       setRoomId(incident?.room?.id ?? incident?.roomId ?? null);
@@ -189,6 +208,113 @@ export function IncidentFormDialog({
       isMounted = false;
     };
   }, [isOpen, roomId]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!isCameraOpen || video === null) {
+      return;
+    }
+
+    video.srcObject = streamRef.current;
+
+    return () => {
+      video.srcObject = null;
+    };
+  }, [isCameraOpen]);
+
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  async function startCamera(): Promise<void> {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError("Camera is not supported on this device.");
+      return;
+    }
+
+    setIsCameraStarting(true);
+    setCameraError(null);
+
+    try {
+      streamRef.current = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false,
+      });
+      setIsCameraOpen(true);
+    } catch (cause: unknown) {
+      if (cause instanceof DOMException && cause.name === "NotAllowedError") {
+        setCameraError(
+          "Camera permission denied. Allow camera access and try again."
+        );
+      } else if (cause instanceof DOMException && cause.name === "NotFoundError") {
+        setCameraError("No camera found on this device.");
+      } else {
+        setCameraError("Unable to start the camera.");
+      }
+    } finally {
+      setIsCameraStarting(false);
+    }
+  }
+
+  function stopCamera(): void {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    setIsCameraOpen(false);
+    setCameraError(null);
+  }
+
+  function handleToggleCamera(): void {
+    if (isCameraOpen) {
+      stopCamera();
+      return;
+    }
+
+    void startCamera();
+  }
+
+  function capturePhoto(): void {
+    const video = videoRef.current;
+
+    if (video === null) {
+      return;
+    }
+
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      setCameraError("Camera is still starting. Try again.");
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const context = canvas.getContext("2d");
+    if (context === null) {
+      setCameraError("Unable to capture the photo.");
+      return;
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob === null) {
+          setCameraError("Unable to capture the photo.");
+          return;
+        }
+
+        setPhoto(
+          new File([blob], "camera-photo.jpg", { type: "image/jpeg" })
+        );
+        stopCamera();
+      },
+      "image/jpeg",
+      0.9
+    );
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -303,6 +429,7 @@ export function IncidentFormDialog({
         toast.success("Incident created.");
       }
 
+      stopCamera();
       setIsOpen(false);
       onSaved();
     } catch (cause: unknown) {
@@ -528,6 +655,38 @@ export function IncidentFormDialog({
                   }
                   required
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onPress={handleToggleCamera}
+                  isDisabled={isSubmitting || isCameraStarting}
+                >
+                  {isCameraStarting
+                    ? "Starting camera..."
+                    : isCameraOpen
+                      ? "Close camera"
+                      : "Take photo"}
+                </Button>
+                {isCameraOpen && (
+                  <div className="flex flex-col gap-2">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full rounded-3xl bg-black"
+                    />
+                    <Button
+                      type="button"
+                      onPress={capturePhoto}
+                      isDisabled={isSubmitting}
+                    >
+                      Capture photo
+                    </Button>
+                  </div>
+                )}
+                {cameraError && <FieldError>{cameraError}</FieldError>}
+                {photo && <FieldDescription>{photo.name}</FieldDescription>}
               </Field>
             )}
             {error && <FieldError>{error}</FieldError>}
