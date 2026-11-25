@@ -2,7 +2,7 @@
 
 import { ImageIcon } from "lucide-react";
 import { IncidentPhotoDialog } from "@/components/admin/admin-incident-photo-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -241,6 +241,17 @@ export function WorkerIncidentsTable({
                       </Button>
                     }
                   />
+                )}
+                {incident.reportLink !== null && (
+                  <LinkButton
+                    href={incident.reportLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="ghost"
+                    size="sm"
+                  >
+                    Download PDF
+                  </LinkButton>
                 )}
               </div>
             </TableCell>

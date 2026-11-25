@@ -51,6 +51,7 @@ export interface IncidentResponseDto {
   incidentNumber: string;
   description: string;
   photoPath: string | null;
+  reportLink: string | null;
   safetyHazard: boolean;
   operationalImpact: boolean;
   affectedArea: number;
