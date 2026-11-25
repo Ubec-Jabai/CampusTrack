@@ -73,7 +73,7 @@ function canResolve(status: IncidentStatus): boolean {
   return status === IncidentStatus.APPROVED;
 }
 
-const priorityRowClassName: Record<IncidentPriority, string> = {
+export const priorityRowClassName: Record<IncidentPriority, string> = {
   [IncidentPriority.LOW]: "bg-green-100/50",
   [IncidentPriority.MEDIUM]: "bg-blue-100/50",
   [IncidentPriority.HIGH]: "bg-amber-100/50",

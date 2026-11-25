@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { WorkerIncidentDetailsDialog } from "@/components/worker/worker-incident-details-dialog";
-import { WorkerIncidentsTable } from "@/components/worker/worker-incidents-table";
+import {
+  priorityRowClassName,
+  WorkerIncidentsTable,
+} from "@/components/worker/worker-incidents-table";
 import { RoomSelect } from "@/components/admin/admin-room-select";
 import {
   INCIDENT_CATEGORY_OPTIONS,
@@ -450,6 +453,21 @@ export function WorkerIncidentsPageClient() {
 
       <Card>
         <CardContent>
+          {!isLoading && !error && (
+            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="text-muted-foreground">Priority colors</span>
+              {INCIDENT_PRIORITY_OPTIONS.map((option) => (
+                <span key={option.id} className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className={`size-4 rounded-sm border ${priorityRowClassName[option.id]}`}
+                  />
+                  <span>{option.label}</span>
+                </span>
+              ))}
+            </div>
+          )}
+
           {isLoading && (
             <p className="py-10 text-center text-muted-foreground">
               Loading incidents...

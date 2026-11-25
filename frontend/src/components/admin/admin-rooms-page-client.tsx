@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { RoomFormDialog } from "@/components/admin/admin-room-form-dialog";
-import { RoomsTable } from "@/components/admin/admin-rooms-table";
+import {
+  RoomsTable,
+  criticalityRowClassName,
+} from "@/components/admin/admin-rooms-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -382,6 +385,21 @@ export function RoomsPageClient() {
 
       <Card>
         <CardContent>
+          {!isLoading && !error && (
+            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="text-muted-foreground">Criticality colors</span>
+              {CRITICALITY_OPTIONS.map((option) => (
+                <span key={option.id} className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className={`size-4 rounded-sm border ${criticalityRowClassName[option.id]}`}
+                  />
+                  <span>{option.label}</span>
+                </span>
+              ))}
+            </div>
+          )}
+
           {isLoading && (
             <p className="py-10 text-center text-muted-foreground">
               Loading rooms...

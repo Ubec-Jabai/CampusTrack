@@ -45,7 +45,7 @@ function formatEnum(value: string): string {
     .join(" ");
 }
 
-const criticalityRowClassName: Record<RoomCriticality, string> = {
+export const criticalityRowClassName: Record<RoomCriticality, string> = {
   [RoomCriticality.LOW]: "bg-green-100/50",
   [RoomCriticality.NORMAL]: "bg-blue-100/50",
   [RoomCriticality.HIGH]: "bg-amber-100/50",

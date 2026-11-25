@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { IncidentFormDialog } from "@/components/admin/admin-incident-form-dialog";
-import { IncidentsTable } from "@/components/admin/admin-incidents-table";
+import {
+  IncidentsTable,
+  statusRowClassName,
+} from "@/components/admin/admin-incidents-table";
 import { RoomSelect } from "@/components/admin/admin-room-select";
 import { UserSelect } from "@/components/admin/admin-user-select";
 import {
@@ -481,6 +484,21 @@ export function IncidentsPageClient() {
 
       <Card>
         <CardContent>
+          {!isLoading && !error && (
+            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="text-muted-foreground">Status colors</span>
+              {INCIDENT_STATUS_OPTIONS.map((option) => (
+                <span key={option.id} className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className={`size-4 rounded-sm border ${statusRowClassName[option.id]}`}
+                  />
+                  <span>{option.label}</span>
+                </span>
+              ))}
+            </div>
+          )}
+
           {isLoading && (
             <p className="py-10 text-center text-muted-foreground">
               Loading incidents...

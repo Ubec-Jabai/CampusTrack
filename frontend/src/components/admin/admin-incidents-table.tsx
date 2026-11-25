@@ -54,7 +54,7 @@ function formatEnum(value: string | null): string {
     .join(" ");
 }
 
-const statusRowClassName: Record<IncidentStatus, string> = {
+export const statusRowClassName: Record<IncidentStatus, string> = {
   [IncidentStatus.REPORTED]: "bg-amber-100/50",
   [IncidentStatus.INSPECTING]: "bg-yellow-100/50",
   [IncidentStatus.PENDING_REVIEW]: "bg-violet-100/50",
