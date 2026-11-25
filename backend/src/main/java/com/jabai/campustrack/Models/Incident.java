@@ -113,6 +113,9 @@ public class Incident {
   @Column(name = "rejection_reason", length = 500)
   private String rejectionReason;
 
+  @Column(name = "report_link", length = 1000)
+  private String reportLink;
+
   protected Incident() { }
 
   public Incident(
@@ -172,6 +175,7 @@ public class Incident {
   public LocalDateTime getApprovedAt() { return approvedAt; }
   public LocalDateTime getAssignedAt() { return assignedAt; }
   public String getRejectionReason() { return rejectionReason; }
+  public String getReportLink() { return reportLink; }
   public List<MaintenanceRecord> getMaintenanceRecords() { return maintenanceRecords; }
 
   // Setters
@@ -199,6 +203,7 @@ public class Incident {
   public void setApprovedAt(LocalDateTime value) { approvedAt = value; }
   public void setAssignedAt(LocalDateTime value) { assignedAt = value; }
   public void setRejectionReason(String value) { rejectionReason = value; }
+  public void setReportLink(String value) { reportLink = value; }
   public void removeMaintenanceRecord(MaintenanceRecord value) {
     maintenanceRecords.remove(value);
     value.setIncident(null);

@@ -37,6 +37,7 @@ public class IncidentResponseDto {
   private LocalDateTime inspectedAt;
   private LocalDateTime approvedAt;
   private String rejectionReason;
+  private String reportLink;
 
   public IncidentResponseDto(
           Long id,
@@ -142,6 +143,7 @@ public class IncidentResponseDto {
   public LocalDateTime getInspectedAt() { return inspectedAt; }
   public LocalDateTime getApprovedAt() { return approvedAt; }
   public String getRejectionReason() { return rejectionReason; }
+  public String getReportLink() { return reportLink; }
 
   // Setters
   public void setAsset(AssetResponseDto assetResponseDto) { this.asset = assetResponseDto; }
@@ -154,4 +156,5 @@ public class IncidentResponseDto {
   public void setInspectedAt(LocalDateTime inspectedAt) { this.inspectedAt = inspectedAt; }
   public void setApprovedAt(LocalDateTime approvedAt) { this.approvedAt = approvedAt; }
   public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+  public void setReportLink(String reportLink) { this.reportLink = reportLink; }
 }

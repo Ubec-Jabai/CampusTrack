@@ -3,6 +3,8 @@ package com.jabai.campustrack.Services;
 import com.jabai.campustrack.DTOs.Requests.PdfParserRequestDto;
 import com.jabai.campustrack.DTOs.Responses.PdfParserResponseDto;
 import com.jabai.campustrack.Exceptions.CustomExceptions.PdfParserException;
+import com.jabai.campustrack.Models.User;
+import com.jabai.campustrack.Securities.JwtUtil;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -21,16 +23,28 @@ public class PdfParserService {
   private final RestClient restClient;
   private final String pdfParserUrl;
   private final ObjectMapper objectMapper;
+  private final JwtUtil jwtUtil;
 
   public PdfParserService(
-          @Value("${spring.application.microservices.pdf-parser}") String pdfParserUrl
+          @Value("${spring.application.microservices.pdf-parser}") String pdfParserUrl,
+          JwtUtil jwtUtil
   ) {
     this.restClient = RestClient.builder().build();
     this.pdfParserUrl = pdfParserUrl;
     this.objectMapper = new ObjectMapper();
+    this.jwtUtil = jwtUtil;
   }
 
   public ResponseEntity<PdfParserResponseDto> parsePdf(PdfParserRequestDto pdfParserRequestDto, String Authorization) {
+    return ResponseEntity.ok(send(pdfParserRequestDto, Authorization));
+  }
+
+  // Django verifies this token; claims must stay in the shape JwtUtil generates.
+  public PdfParserResponseDto createIncidentReport(PdfParserRequestDto pdfParserRequestDto, User requestedBy) {
+    return send(pdfParserRequestDto, "Bearer " + jwtUtil.generateToken(requestedBy));
+  }
+
+  private PdfParserResponseDto send(PdfParserRequestDto pdfParserRequestDto, String Authorization) {
     String json;
 
     try {
@@ -53,7 +67,7 @@ public class PdfParserService {
         throw new PdfParserException("PDF parser returned empty response", 502);
       }
 
-      return ResponseEntity.ok(response);
+      return response;
     } catch (RestClientResponseException e) {
       String message = e.getResponseBodyAsString();
       if (message.isBlank()) { message = "PDF parser request failed"; }

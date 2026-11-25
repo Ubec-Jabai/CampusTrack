@@ -1,12 +1,14 @@
 package com.jabai.campustrack.Services;
 
 import com.jabai.campustrack.DTOs.Requests.CreateIncidentRequestDto;
+import com.jabai.campustrack.DTOs.Requests.PdfParserRequestDto;
 import com.jabai.campustrack.DTOs.Requests.SearchIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Requests.UpdateIncidentRequestDto;
 import com.jabai.campustrack.DTOs.Responses.AssetResponseDto;
 import com.jabai.campustrack.DTOs.Responses.BuildingResponseDto;
 import com.jabai.campustrack.DTOs.Responses.IncidentPhotoResponseDto;
 import com.jabai.campustrack.DTOs.Responses.IncidentResponseDto;
+import com.jabai.campustrack.DTOs.Responses.PdfParserResponseDto;
 import com.jabai.campustrack.DTOs.Responses.RoomResponseDto;
 import com.jabai.campustrack.DTOs.Responses.UserProfileResponseDto;
 import com.jabai.campustrack.Exceptions.CustomExceptions.DuplicatedRowException;
@@ -17,6 +19,7 @@ import com.jabai.campustrack.Models.Enums.IncidentCategory;
 import com.jabai.campustrack.Models.Incident;
 import com.jabai.campustrack.Models.Room;
 import com.jabai.campustrack.Models.User;
+import com.jabai.campustrack.Models.UserProfile;
 import com.jabai.campustrack.Models.Enums.IncidentPriority;
 import com.jabai.campustrack.Models.Enums.RoomCriticality;
 import com.jabai.campustrack.Models.Enums.IncidentStatus;
@@ -44,7 +47,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @Service
@@ -68,20 +74,26 @@ public class IncidentService {
     private static final int MEDIUM_PRIORITY_MAX_SCORE = 7;
     private static final int HIGH_PRIORITY_MAX_SCORE = 12;
 
+    private static final DateTimeFormatter REPORT_DATE_FORMAT = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.US);
+    private static final DateTimeFormatter REPORT_TIME_FORMAT = DateTimeFormatter.ofPattern("h:mm a", Locale.US);
+    private static final String NOT_AVAILABLE = "N/A";
+
     private final IncidentRepository incidentRepository;
     private final RoomRepository roomRepository;
     private final AssetRepository assetRepository;
     private final UserRepository userRepository;
     private final IncidentPhotoService incidentPhotoService;
     private final NotificationService notificationService;
+    private final PdfParserService pdfParserService;
 
-    public IncidentService(IncidentRepository incidents, RoomRepository rooms, AssetRepository assets, UserRepository users, IncidentPhotoService incidentPhotoService, NotificationService notificationService) {
+    public IncidentService(IncidentRepository incidents, RoomRepository rooms, AssetRepository assets, UserRepository users, IncidentPhotoService incidentPhotoService, NotificationService notificationService, PdfParserService pdfParserService) {
         this.incidentRepository = incidents;
         this.roomRepository = rooms;
         this.assetRepository = assets;
         this.userRepository = users;
         this.incidentPhotoService = incidentPhotoService;
         this.notificationService = notificationService;
+        this.pdfParserService = pdfParserService;
     }
 
     // Create
@@ -306,6 +318,9 @@ public class IncidentService {
                 foundIncident.getRoom(),
                 foundIncident.getAsset()));
 
+        if (foundIncident.getStatus() == IncidentStatus.RESOLVED && foundIncident.getReportLink() == null)
+            attachIncidentReport(foundIncident, requesterId);
+
         Incident response = incidentRepository.save(foundIncident);
 
         if (assignedWorker != null)
@@ -369,6 +384,113 @@ public class IncidentService {
                     String.format("Incident %s has been rejected. Reason: %s", incident.getIncidentNumber(), incident.getRejectionReason()));
             default -> { }
         }
+    }
+
+    // Report generation must never block resolving the incident. A later PATCH to RESOLVED retries while the link is null.
+    private void attachIncidentReport(Incident incident, Long requesterId) {
+        try {
+            User requester = userRepository
+                    .findById(requesterId)
+                    .orElseThrow(() -> new RowNotFoundException(String.format("Unable to find the user with an ID of %d.", requesterId)));
+            PdfParserResponseDto report = pdfParserService.createIncidentReport(buildReportRequest(incident, requester), requester);
+
+            if (report == null || report.getLink() == null || report.getLink().isBlank()) {
+                log.error("PDF service returned no link for incident {}", incident.getIncidentNumber());
+                return;
+            }
+
+            incident.setReportLink(asDownloadLink(report.getLink(), incident.getIncidentNumber()));
+        } catch (RuntimeException e) {
+            log.error("Failed to generate PDF report for incident {}", incident.getIncidentNumber(), e);
+        }
+    }
+
+    // Supabase serves stored PDFs as text/plain; the download param adds an attachment disposition.
+    private String asDownloadLink(String link, String incidentNumber) {
+        return link + (link.contains("?") ? "&" : "?") + "download=" + incidentNumber + ".pdf";
+    }
+
+    private PdfParserRequestDto buildReportRequest(Incident incident, User requester) {
+        Room room = incident.getRoom();
+
+        PdfParserRequestDto.ReportInfo report = new PdfParserRequestDto.ReportInfo(
+                incident.getIncidentNumber(),
+                formatReportDate(incident.getResolvedAt()),
+                formatReportDate(incident.getCreatedAt()),
+                formatReportTime(incident.getCreatedAt()),
+                String.format("Room %s, %s", room.getRoomNumber(), room.getBuilding().getName()),
+                toReportSeverity(incident.getPriority()));
+
+        List<PdfParserRequestDto.InvolvedParty> involvedParties = new ArrayList<>();
+        involvedParties.add(toInvolvedParty(incident.getReportedBy()));
+        User assignedTo = incident.getAssignedTo();
+        if (assignedTo != null && !Objects.equals(assignedTo.getId(), incident.getReportedBy().getId()))
+            involvedParties.add(toInvolvedParty(assignedTo));
+
+        PdfParserRequestDto.IncidentDetails details = new PdfParserRequestDto.IncidentDetails(
+                incident.getDescription() == null || incident.getDescription().isBlank()
+                        ? "No description provided."
+                        : incident.getDescription(),
+                String.format("Incident resolved by %s on %s.", fullName(requester), formatReportDate(incident.getResolvedAt())));
+
+        PdfParserRequestDto.Preparer preparer = new PdfParserRequestDto.Preparer(
+                fullName(requester),
+                requester.getUserRole().name(),
+                departmentOf(requester));
+
+        return new PdfParserRequestDto(report, involvedParties, details, preparer);
+    }
+
+    private PdfParserRequestDto.InvolvedParty toInvolvedParty(User user) {
+        UserProfile profile = user.getProfile();
+        String idNumber = profile == null || profile.getStudentNumber() == null || profile.getStudentNumber().isBlank()
+                ? String.valueOf(user.getId())
+                : profile.getStudentNumber();
+
+        return new PdfParserRequestDto.InvolvedParty(
+                idNumber,
+                fullName(user),
+                user.getUserRole().name(),
+                departmentOf(user),
+                contactOf(user));
+    }
+
+    private String fullName(User user) {
+        UserProfile profile = user.getProfile();
+        if (profile == null) return user.getEmail();
+        return (profile.getFirstName() + " " + profile.getLastName()).trim();
+    }
+
+    private String departmentOf(User user) {
+        UserProfile profile = user.getProfile();
+        if (profile == null || profile.getDepartment() == null || profile.getDepartment().isBlank())
+            return NOT_AVAILABLE;
+        return profile.getDepartment();
+    }
+
+    private String contactOf(User user) {
+        UserProfile profile = user.getProfile();
+        if (profile == null || profile.getPhone() == null || profile.getPhone().isBlank())
+            return user.getEmail();
+        return profile.getPhone();
+    }
+
+    private PdfParserRequestDto.Severity toReportSeverity(IncidentPriority priority) {
+        if (priority == null) return PdfParserRequestDto.Severity.LOW;
+
+        return switch (priority) {
+            case CRITICAL, HIGH -> PdfParserRequestDto.Severity.HIGH;
+            case MEDIUM -> PdfParserRequestDto.Severity.MEDIUM;
+            case LOW -> PdfParserRequestDto.Severity.LOW;
+        };
+    }
+
+    private String formatReportDate(LocalDateTime value) {
+        return value == null ? NOT_AVAILABLE : value.format(REPORT_DATE_FORMAT);
+    }
+
+    private String formatReportTime(LocalDateTime value) {
+        return value == null ? NOT_AVAILABLE : value.format(REPORT_TIME_FORMAT);
     }
 
     private void notifyAssignment(Incident incident, User worker) {
@@ -573,6 +695,7 @@ public class IncidentService {
         }
         incidentResponseDto.setAssignedAt(incident.getAssignedAt());
         incidentResponseDto.setPhotoPath(incident.getPhotoPath());
+        incidentResponseDto.setReportLink(incident.getReportLink());
         if (incident.getInspectedBy() != null)
             incidentResponseDto.setInspectedBy(UserProfileResponseDto.from(incident.getInspectedBy()));
         incidentResponseDto.setInspectedAt(incident.getInspectedAt());
