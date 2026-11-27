@@ -15,7 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * <h1>UserController: ADMIN</h1>
+ * <h1>UserController: JADE</h1>
  */
 @RestController
 @RequestMapping("/api/users")
