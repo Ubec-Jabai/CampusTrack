@@ -11,7 +11,7 @@ _incident_report_request_adapter = TypeAdapter(CreateIncidentReportRequest)
 
 
 @require_POST
-def create_pdf_report(request: HttpRequest):
+async def create_pdf_report(request: HttpRequest) -> JsonResponse:
   try:
     payload = json.loads(request.body)
   except json.JSONDecodeError:
@@ -23,7 +23,7 @@ def create_pdf_report(request: HttpRequest):
     return JsonResponse({"message": "Invalid incident report data"}, status=400)
 
   try:
-    filename, link = services.create_incident_report_pdf(report_data)
+    filename, link = await services.create_incident_report_pdf(report_data)
     response_body: CreateIncidentReportResponse = {"filename": filename, "link": link}
     return JsonResponse(response_body)
   except Exception as e:

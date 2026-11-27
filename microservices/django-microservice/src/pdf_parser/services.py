@@ -1,7 +1,9 @@
 import time, uuid
+from asgiref.sync import sync_to_async
 from django.template.loader import render_to_string
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
 from core.supabase_client import get_supabase_client
+from .schemas import CreateIncidentReportRequest
 
 
 _SUPABASE = get_supabase_client()
@@ -20,20 +22,25 @@ def _upload_pdf_to_supabase(pdf_bytes: bytes, filename: str, bucket_name: str = 
         raise
 
 
-def create_incident_report_pdf(data: dict) -> tuple[str, str]:
-    rendered_html = render_to_string(_PDF_TEMPLATE_PATH, {
+async def create_incident_report_pdf(data: CreateIncidentReportRequest) -> tuple[str, str]:
+    rendered_html = await sync_to_async(render_to_string)(_PDF_TEMPLATE_PATH, {
         "report": data.get("report", {}),
         "involved_parties": data.get("involved_parties", []),
         "details": data.get("details", {}),
         "preparer": data.get("preparer", {}),
     })
 
-    with sync_playwright() as p, p.chromium.launch() as browser:
-        page = browser.new_page()
-        page.set_content(rendered_html, wait_until="networkidle")
-        pdf_bytes = page.pdf(format="A4", print_background=True)
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        try:
+            page = await browser.new_page()
+            await page.set_content(rendered_html, wait_until="networkidle")
+            pdf_bytes = await page.pdf(format="A4", print_background=True)
+        finally:
+            await browser.close()
 
     filename = f"UC_Incident_Report_{uuid.uuid4().hex[:8]}.pdf"
-    supabase_url = _upload_pdf_to_supabase(pdf_bytes, filename)
+    # Supabase uses the synchronous client, so keep its network calls off the event loop.
+    supabase_url = await sync_to_async(_upload_pdf_to_supabase)(pdf_bytes, filename)
 
     return filename, supabase_url
